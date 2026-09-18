@@ -1,0 +1,310 @@
+﻿@page "/students/add"
+
+@using StudentManagement.Client.Models.Students
+@using StudentManagement.Client.Services.Interfaces
+
+@inject IStudentService StudentService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Add Student</PageTitle>
+
+
+<MudContainer MaxWidth="MaxWidth.Medium"
+              Class="mt-6">
+
+    <MudPaper Elevation="2"
+              Class="pa-6">
+
+        <MudStack Spacing="4">
+
+            <div>
+
+                <MudText Typo="Typo.h4">
+                    Add Student
+                </MudText>
+
+                <MudText Typo="Typo.body2"
+                         Color="Color.Secondary">
+                    Enter the student's information below.
+                </MudText>
+
+            </div>
+
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error">
+                    @errorMessage
+                </MudAlert>
+            }
+
+
+            <EditForm Model="@student"
+                      OnValidSubmit="SaveStudent">
+
+                <DataAnnotationsValidator />
+
+
+                <MudGrid Spacing="3">
+
+                    <!-- First Name -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudTextField T="string"
+                                      Label="First Name"
+                                      @bind-Value="student.FirstName"
+                                      For="@(() => student.FirstName)"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="First name is required."
+                                      Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Last Name -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudTextField T="string"
+                                      Label="Last Name"
+                                      @bind-Value="student.LastName"
+                                      For="@(() => student.LastName)"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="Last name is required."
+                                      Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Email -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudTextField T="string"
+                                      Label="Email"
+                                      @bind-Value="student.Email"
+                                      For="@(() => student.Email)"
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="Email is required."
+                                      Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Phone -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudTextField T="string"
+                                      Label="Phone Number"
+                                      @bind-Value="student.Phone"
+                                      For="@(() => student.Phone)"
+                                      Variant="Variant.Outlined"
+                                      Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Date of Birth -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudDatePicker Label="Date of Birth"
+                                       @bind-Date="student.DateOfBirth"
+                                       Variant="Variant.Outlined"
+                                       Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Gender -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudSelect T="string"
+                                   Label="Gender"
+                                   @bind-Value="student.Gender"
+                                   Variant="Variant.Outlined"
+                                   Style="width:100%;">
+
+                            <MudSelectItem T="string"
+                                           Value="@("Male")">
+                                Male
+                            </MudSelectItem>
+
+                            <MudSelectItem T="string"
+                                           Value="@("Female")">
+                                Female
+                            </MudSelectItem>
+
+                            <MudSelectItem T="string"
+                                           Value="@("Other")">
+                                Other
+                            </MudSelectItem>
+
+                        </MudSelect>
+
+                    </MudItem>
+
+
+                    <!-- Enrollment Date -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudDatePicker Label="Enrollment Date"
+                                       @bind-Date="student.EnrollmentDate"
+                                       Variant="Variant.Outlined"
+                                       Required="true"
+                                       RequiredError="Enrollment date is required."
+                                       Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Status -->
+
+                    <MudItem xs="12" md="6">
+
+                        <MudStack Spacing="1">
+
+                            <MudText Typo="Typo.body2">
+                                Student Status
+                            </MudText>
+
+                            <MudCheckBox T="bool"
+                                         @bind-Value="student.IsActive"
+                                         Label="Active" />
+
+                        </MudStack>
+
+                    </MudItem>
+
+                </MudGrid>
+
+
+                <MudDivider Class="my-5" />
+
+
+                <MudStack Row="true"
+                          Justify="Justify.FlexEnd"
+                          Spacing="2">
+
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Disabled="@isSaving"
+                               OnClick="Cancel">
+
+                        Cancel
+
+                    </MudButton>
+
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@isSaving">
+
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="mr-2" />
+
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Add Student</span>
+                        }
+
+                    </MudButton>
+
+                </MudStack>
+
+            </EditForm>
+
+        </MudStack>
+
+    </MudPaper>
+
+</MudContainer>
+
+
+@code
+{
+    private CreateStudentDto student = new();
+
+    private bool isSaving;
+
+    private string? errorMessage;
+
+
+    private async Task SaveStudent()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+
+        if (student.EnrollmentDate == null)
+        {
+            errorMessage =
+                "Enrollment date is required.";
+
+            return;
+        }
+
+
+        try
+        {
+            isSaving = true;
+
+            errorMessage = null;
+
+
+            var createdStudent =
+                await StudentService.CreateAsync(student);
+
+
+            if (createdStudent == null)
+            {
+                errorMessage =
+                    "Student could not be created.";
+
+                return;
+            }
+
+
+            Snackbar.Add(
+                $"Student created successfully. Admission No: {createdStudent.AdmissionNumber}",
+                Severity.Success);
+
+
+            Navigation.NavigateTo("/students");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            errorMessage =
+                "An error occurred while creating the student.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/students");
+    }
+}

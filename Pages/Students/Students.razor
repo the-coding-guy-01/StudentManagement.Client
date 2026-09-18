@@ -1,0 +1,204 @@
+﻿@page "/students"
+
+@using StudentManagement.Client.Models.Students
+
+@inject StudentManagement.Client.Services.Interfaces.IStudentService StudentService
+@inject NavigationManager Navigation
+
+<PageTitle>Students</PageTitle>
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge"
+              Class="mt-6">
+
+    <MudStack Row="true"
+              Justify="Justify.SpaceBetween"
+              AlignItems="AlignItems.Center"
+              Class="mb-4">
+
+        <div>
+
+            <MudText Typo="Typo.h4">
+                Students
+            </MudText>
+
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary">
+                Manage registered students
+            </MudText>
+
+        </div>
+
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddStudent">
+
+            Add Student
+
+        </MudButton>
+
+    </MudStack>
+
+
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true"
+                             Color="Color.Primary" />
+
+        <MudText Class="mt-2">
+            Loading students...
+        </MudText>
+    }
+
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @errorMessage
+        </MudAlert>
+    }
+
+    else if (students.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info">
+            No students found.
+        </MudAlert>
+    }
+
+    else
+    {
+        <MudTable Items="students"
+                  Hover="true"
+                  Dense="false"
+                  Striped="true">
+
+            <HeaderContent>
+
+                <MudTh>ID</MudTh>
+
+                <MudTh>
+                    Admission No.
+                </MudTh>
+
+                <MudTh>
+                    Name
+                </MudTh>
+
+                <MudTh>
+                    Email
+                </MudTh>
+
+                <MudTh>
+                    Gender
+                </MudTh>
+
+                <MudTh>
+                    Phone
+                </MudTh>
+
+                <MudTh>
+                    Status
+                </MudTh>
+
+            </HeaderContent>
+
+
+            <RowTemplate>
+
+                <MudTd DataLabel="ID">
+                    @context.Id
+                </MudTd>
+
+                <MudTd DataLabel="Admission No.">
+                    @context.AdmissionNumber
+                </MudTd>
+
+                <MudTd DataLabel="Name">
+                    @context.FullName
+                </MudTd>
+
+                <MudTd DataLabel="Email">
+                    @context.Email
+                </MudTd>
+
+                <MudTd DataLabel="Gender">
+                    @context.Gender
+                </MudTd>
+
+                <MudTd DataLabel="Phone">
+                    @context.Phone
+                </MudTd>
+
+                <MudTd DataLabel="Status">
+
+                    @if (context.IsActive)
+                    {
+                        <MudChip T="string"
+                                 Color="Color.Success"
+                                 Size="Size.Small">
+                            Active
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string"
+                                 Color="Color.Error"
+                                 Size="Size.Small">
+                            Inactive
+                        </MudChip>
+                    }
+
+                </MudTd>
+
+            </RowTemplate>
+
+        </MudTable>
+    }
+
+</MudContainer>
+
+
+@code
+{
+    private List<StudentDto> students = new();
+
+    private bool isLoading = true;
+
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudents();
+    }
+
+    private void AddStudent()
+    {
+        Navigation.NavigateTo("/students/add");
+    }
+
+    private async Task LoadStudents()
+    {
+        try
+        {
+            isLoading = true;
+
+            errorMessage = null;
+
+            students =
+                await StudentService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            errorMessage =
+                "Students could not be loaded.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

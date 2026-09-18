@@ -5,18 +5,111 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<MudLayout>
 
-        <article class="content px-4">
+    <!-- TOP BAR -->
+    <MudAppBar Elevation="1">
+
+        <!-- Hamburger Menu -->
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@ToggleDrawer" />
+
+        <MudText Typo="Typo.h6"
+                 Class="ml-3">
+            Student Management
+        </MudText>
+
+        <MudSpacer />
+
+
+        <!-- Notification -->
+        <MudIconButton Icon="@Icons.Material.Filled.Notifications"
+                       Color="Color.Inherit" />
+
+
+        <!-- Profile -->
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle"
+                       Color="Color.Inherit" />
+
+    </MudAppBar>
+
+
+    <!-- SIDEBAR -->
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Breakpoint="Breakpoint.Md"
+               Elevation="1">
+
+        <!-- Sidebar Header -->
+        <MudDrawerHeader>
+
+            <MudStack Row="true"
+                      AlignItems="AlignItems.Center"
+                      Spacing="2">
+
+                <MudIcon Icon="@Icons.Material.Filled.School"
+                         Size="Size.Large"
+                         Color="Color.Primary" />
+
+                <MudText Typo="Typo.h6">
+                    Edu Manager
+                </MudText>
+
+            </MudStack>
+
+        </MudDrawerHeader>
+
+
+        <!-- Navigation -->
+        <MudNavMenu>
+
+            <MudNavLink Href="/dashboard"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Dashboard">
+
+                Dashboard
+
+            </MudNavLink>
+
+
+            <MudNavLink Href="/students"
+                        Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.People">
+
+                Students
+
+            </MudNavLink>
+
+        </MudNavMenu>
+
+    </MudDrawer>
+
+
+    <!-- PAGE CONTENT -->
+    <MudMainContent>
+
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge"
+                      Class="mt-6">
+
             @Body
-        </article>
-    </main>
-</div>
+
+        </MudContainer>
+
+    </MudMainContent>
+
+</MudLayout>
+
+
+@code
+{
+    private bool _drawerOpen = true;
+
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

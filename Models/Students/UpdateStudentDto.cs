@@ -2,7 +2,7 @@
 
 namespace StudentManagement.Client.Models.Students
 {
-    public class CreateStudentDto
+    public class UpdateStudentDto
     {
         [Required]
         [MaxLength(100)]
@@ -25,8 +25,8 @@ namespace StudentManagement.Client.Models.Students
         [MaxLength(20)]
         public string Phone { get; set; } = string.Empty;
 
-        public DateTime? EnrollmentDate { get; set; } = DateTime.Today;
+        public DateTime EnrollmentDate { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
     }
 }
