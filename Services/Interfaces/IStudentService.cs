@@ -11,6 +11,8 @@ namespace StudentManagement.Client.Services.Interfaces
         Task<StudentDto?> CreateAsync(
             CreateStudentDto dto);
 
+        Task<int> GetTotalStudentsAsync();
+
         Task<StudentDto?> UpdateAsync(
             int id,
             UpdateStudentDto dto);
