@@ -41,6 +41,11 @@ namespace StudentManagement.Client.Services
                 .ReadFromJsonAsync<StudentDto>();
         }
 
+        public async Task<int> GetTotalStudentsAsync()
+        {
+            return await _http.GetFromJsonAsync<int>("api/students/count");
+        }
+
 
         public async Task<StudentDto?> CreateAsync(
             CreateStudentDto dto)
