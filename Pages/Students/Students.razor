@@ -11,35 +11,69 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge"
               Class="mt-6">
 
-    <MudStack Row="true"
-              Justify="Justify.SpaceBetween"
-              AlignItems="AlignItems.Center"
-              Class="mb-4">
+    <MudGrid Spacing="3" AlignItems="AlignItems.Center" Class="mb-4">
 
-        <div>
+        <!-- Total Students Card -->
+        <MudItem xs="12" sm="4" md="3">
+            <MudCard Class="pa-4">
+                <MudStack Row="true"
+                          AlignItems="AlignItems.Center"
+                          Justify="Justify.SpaceBetween">
 
-            <MudText Typo="Typo.h4">
-                Students
-            </MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.People"
+                             Size="Size.Large"
+                             Color="Color.Primary" />
 
-            <MudText Typo="Typo.body2"
-                     Color="Color.Secondary">
-                Manage registered students
-            </MudText>
+                    <MudStack Spacing="0"
+                              AlignItems="AlignItems.End">
 
+                        <MudText Typo="Typo.body2">
+                            Total Students
+                        </MudText>
+
+                        <MudText Typo="Typo.h4">
+                            @totalStudents
+                        </MudText>
+
+                    </MudStack>
+
+                </MudStack>
+            </MudCard>
+        </MudItem>
+
+
+        <!-- Search -->
+        <div class="admin-dashboard-top-right-section">
+            <MudItem xs="12" sm="5" md="6">
+                <MudTextField @bind-Value="searchText"
+                              Placeholder="Search students..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="true"
+                              Clearable="true"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              FullWidth="true" />
+            </MudItem>
+
+
+            <!-- Add Student -->
+            <MudItem xs="12" sm="3" md="3">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddStudent"
+                           FullWidth="true"
+                           Size="Size.Large">
+
+                    Add Student
+
+                </MudButton>
+            </MudItem>
         </div>
+        
 
-
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="AddStudent">
-
-            Add Student
-
-        </MudButton>
-
-    </MudStack>
+    </MudGrid>
 
 
     @if (isLoading)
@@ -68,7 +102,7 @@
 
     else
     {
-        <MudTable Items="students"
+        <MudTable Items="FilteredStudents"
                   Hover="true"
                   Dense="false"
                   Striped="true">
@@ -151,12 +185,29 @@
 
                 </MudTd>
 
+                <MudTd DataLabel="Options">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => EditStudent(context.Id))" />
+                </MudTd>
+
             </RowTemplate>
 
         </MudTable>
     }
 
 </MudContainer>
+
+<style>
+    .admin-dashboard-top-right-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem; /* Adjust the gap as needed */
+        padding: 20px;
+        border: 1px solid red;
+    }
+</style>
 
 
 @code
@@ -167,9 +218,13 @@
 
     private string? errorMessage;
 
+    private int totalStudents;
+
+    private string searchText = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        totalStudents = await StudentService.GetTotalStudentsAsync();
         await LoadStudents();
     }
 
@@ -201,4 +256,19 @@
             isLoading = false;
         }
     }
+
+    private IEnumerable<StudentDto> FilteredStudents =>
+    string.IsNullOrWhiteSpace(searchText)
+        ? students
+        : students.Where(s =>
+            s.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+            s.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+            s.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+
+    private void EditStudent(int id)
+    {
+        Navigation.NavigateTo(
+            $"/students/update/{id}");
+    }
 }
+
