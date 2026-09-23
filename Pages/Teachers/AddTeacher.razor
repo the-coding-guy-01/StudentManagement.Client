@@ -14,246 +14,311 @@
 <PageTitle>Add Teacher</PageTitle>
 
 
-<div class="teacher-form-page">
+<div class="container-fluid py-4">
 
-    <!-- Header -->
-    <div class="form-header">
+    <!-- =============================== -->
+    <!-- HEADER -->
+    <!-- =============================== -->
 
-        <div>
+    <div class="mb-4">
 
-            <MudButton Variant="Variant.Text"
-                       StartIcon="@Icons.Material.Filled.ArrowBack"
-                       OnClick="Cancel"
-                       Class="back-button">
-                Back to Teachers
-            </MudButton>
+        <MudButton Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="Cancel"
+                   Class="mb-2">
 
-            <MudText Typo="Typo.h4"
-                     Class="form-title">
-                Add Teacher
-            </MudText>
+            Back to Teachers
 
-            <MudText Typo="Typo.body2"
-                     Color="Color.Secondary">
+        </MudButton>
 
-                Create a new teacher account
 
-            </MudText>
+        <h2 class="fw-bold mb-1">
+            Add Teacher
+        </h2>
+
+
+        <p class="text-muted mb-0">
+            Create a new teacher account
+        </p>
+
+    </div>
+
+
+
+    <!-- =============================== -->
+    <!-- FORM CARD -->
+    <!-- =============================== -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body p-4 p-md-5">
+
+            <EditForm Model="@teacher"
+                      OnValidSubmit="SaveTeacher">
+
+                <DataAnnotationsValidator />
+
+
+                <!-- =============================== -->
+                <!-- PERSONAL INFORMATION -->
+                <!-- =============================== -->
+
+                <div class="mb-4">
+
+
+                    <!-- Section Header -->
+
+                    <div class="mb-4">
+
+                        <h5 class="fw-bold mb-1">
+                            Personal Information
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Enter the teacher's personal details
+                        </p>
+
+                    </div>
+
+
+
+                    <div class="row g-4">
+
+
+                        <!-- First Name -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudTextField T="string"
+                                          Label="First Name"
+                                          @bind-Value="teacher.FirstName"
+                                          For="@(() => teacher.FirstName)"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          Class="w-100" />
+
+                        </div>
+
+
+
+                        <!-- Last Name -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudTextField T="string"
+                                          Label="Last Name"
+                                          @bind-Value="teacher.LastName"
+                                          For="@(() => teacher.LastName)"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          Class="w-100" />
+
+                        </div>
+
+
+
+                        <!-- Email -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudTextField T="string"
+                                          Label="Email"
+                                          @bind-Value="teacher.Email"
+                                          For="@(() => teacher.Email)"
+                                          InputType="InputType.Email"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Email"
+                                          Class="w-100" />
+
+                        </div>
+
+
+
+                        <!-- Phone -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudTextField T="string"
+                                          Label="Phone"
+                                          @bind-Value="teacher.Phone"
+                                          For="@(() => teacher.Phone)"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Phone"
+                                          Class="w-100" />
+
+                        </div>
+
+
+
+                        <!-- Date of Birth -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudDatePicker Label="Date of Birth"
+                                           @bind-Date="teacher.DateOfBirth"
+                                           Variant="Variant.Outlined"
+                                           Class="w-100" />
+
+                        </div>
+
+
+
+                        <!-- Gender -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudSelect T="string"
+                                       Label="Gender"
+                                       @bind-Value="teacher.Gender"
+                                       For="@(() => teacher.Gender)"
+                                       Variant="Variant.Outlined"
+                                       Required="true"
+                                       Class="w-100">
+
+                                <MudSelectItem T="string"
+                                               Value="@("Male")">
+                                    Male
+                                </MudSelectItem>
+
+                                <MudSelectItem T="string"
+                                               Value="@("Female")">
+                                    Female
+                                </MudSelectItem>
+
+                                <MudSelectItem T="string"
+                                               Value="@("Other")">
+                                    Other
+                                </MudSelectItem>
+
+                            </MudSelect>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Divider -->
+
+                <hr class="my-5 text-muted" />
+
+
+
+                <!-- =============================== -->
+                <!-- EMPLOYMENT INFORMATION -->
+                <!-- =============================== -->
+
+                <div class="mb-5">
+
+
+                    <div class="mb-4">
+
+                        <h5 class="fw-bold mb-1">
+                            Employment Information
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Enter the teacher's employment details
+                        </p>
+
+                    </div>
+
+
+
+                    <div class="row g-4">
+
+
+                        <!-- Join Date -->
+
+                        <div class="col-12 col-md-6">
+
+                            <MudDatePicker Label="Join Date"
+                                           @bind-Date="teacher.JoinDate"
+                                           Variant="Variant.Outlined"
+                                           Required="true"
+                                           Class="w-100" />
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================== -->
+                <!-- ACTION BUTTONS -->
+                <!-- =============================== -->
+
+                <div class="d-flex flex-column flex-sm-row
+                            justify-content-end
+                            gap-3
+                            pt-3
+                            border-top">
+
+
+                    <!-- Cancel -->
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               Disabled="@isSaving"
+                               OnClick="Cancel"
+                               Class="px-4">
+
+                        Cancel
+
+                    </MudButton>
+
+
+
+                    <!-- Save -->
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               Disabled="@isSaving"
+                               Class="px-4">
+
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="me-2" />
+
+                            <span>
+                                Saving...
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                Add Teacher
+                            </span>
+                        }
+
+                    </MudButton>
+
+
+                </div>
+
+
+            </EditForm>
 
         </div>
 
     </div>
 
-
-    <MudPaper Elevation="0"
-              Class="teacher-form-card">
-
-        <EditForm Model="@teacher"
-                  OnValidSubmit="SaveTeacher">
-
-            <DataAnnotationsValidator />
-
-
-            <!-- Personal Information -->
-
-            <div class="form-section">
-
-                <MudText Typo="Typo.h6"
-                         Class="section-title">
-                    Personal Information
-                </MudText>
-
-                <MudText Typo="Typo.body2"
-                         Color="Color.Secondary"
-                         Class="section-description">
-
-                    Enter the teacher's personal details
-
-                </MudText>
-
-
-                <MudGrid Spacing="3">
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudTextField T="string"
-                                      Label="First Name"
-                                      @bind-Value="teacher.FirstName"
-                                      For="@(() => teacher.FirstName)"
-                                      Variant="Variant.Outlined"
-                                      Required="true"
-                                       />
-
-                    </MudItem>
-
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudTextField T="string"
-                                      Label="Last Name"
-                                      @bind-Value="teacher.LastName"
-                                      For="@(() => teacher.LastName)"
-                                      Variant="Variant.Outlined"
-                                      Required="true"
-                                       />
-
-                    </MudItem>
-
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudTextField T="string"
-                                      Label="Email"
-                                      @bind-Value="teacher.Email"
-                                      For="@(() => teacher.Email)"
-                                      InputType="InputType.Email"
-                                      Variant="Variant.Outlined"
-                                      Required="true"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Email"
-                                       />
-
-                    </MudItem>
-
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudTextField T="string"
-                                      Label="Phone"
-                                      @bind-Value="teacher.Phone"
-                                      For="@(() => teacher.Phone)"
-                                      Variant="Variant.Outlined"
-                                      Required="true"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Phone"
-                                       />
-
-                    </MudItem>
-
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudDatePicker Label="Date of Birth"
-                                       @bind-Date="teacher.DateOfBirth"
-                                       Variant="Variant.Outlined"
-                                        />
-
-                    </MudItem>
-
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudSelect T="string"
-                                   Label="Gender"
-                                   @bind-Value="teacher.Gender"
-                                   For="@(() => teacher.Gender)"
-                                   Variant="Variant.Outlined"
-                                   Required="true"
-                                   >
-
-                            <MudSelectItem T="string"
-                                           Value="@("Male")">
-                                Male
-                            </MudSelectItem>
-
-                            <MudSelectItem T="string"
-                                           Value="@("Female")">
-                                Female
-                            </MudSelectItem>
-
-                            <MudSelectItem T="string"
-                                           Value="@("Other")">
-                                Other
-                            </MudSelectItem>
-
-                        </MudSelect>
-
-                    </MudItem>
-
-                </MudGrid>
-
-            </div>
-
-
-            <MudDivider Class="form-divider" />
-
-
-            <!-- Employment Information -->
-
-            <div class="form-section">
-
-                <MudText Typo="Typo.h6"
-                         Class="section-title">
-                    Employment Information
-                </MudText>
-
-                <MudText Typo="Typo.body2"
-                         Color="Color.Secondary"
-                         Class="section-description">
-
-                    Enter the teacher's employment details
-
-                </MudText>
-
-
-                <MudGrid Spacing="3">
-
-                    <MudItem xs="12" sm="6">
-
-                        <MudDatePicker Label="Join Date"
-                                       @bind-Date="teacher.JoinDate"
-                                       Variant="Variant.Outlined"
-                                       Required="true"
-                                        />
-
-                    </MudItem>
-
-                </MudGrid>
-
-            </div>
-
-
-            <!-- Buttons -->
-
-            <div class="form-actions">
-
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Secondary"
-                           Disabled="@isSaving"
-                           OnClick="Cancel">
-
-                    Cancel
-
-                </MudButton>
-
-
-                <MudButton ButtonType="ButtonType.Submit"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Save"
-                           Disabled="@isSaving">
-
-                    @if (isSaving)
-                    {
-                        <MudProgressCircular Size="Size.Small"
-                                             Indeterminate="true" />
-
-                        <span>Saving...</span>
-                    }
-                    else
-                    {
-                        <span>Add Teacher</span>
-                    }
-
-                </MudButton>
-
-            </div>
-
-        </EditForm>
-
-    </MudPaper>
-
 </div>
+
 
 
 @code {
@@ -279,9 +344,11 @@
         {
             isSaving = true;
 
+
             var result =
                 await TeacherService.CreateAsync(
                     teacher);
+
 
             if (result == null)
             {
@@ -292,14 +359,18 @@
                 return;
             }
 
+
             Snackbar.Add(
                 "Teacher added successfully.",
                 Severity.Success);
 
+
             Navigation.NavigateTo("/teachers");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine(ex);
+
             Snackbar.Add(
                 "An error occurred while creating the teacher.",
                 Severity.Error);
@@ -315,4 +386,5 @@
     {
         Navigation.NavigateTo("/teachers");
     }
+
 }

@@ -1,0 +1,647 @@
+﻿@page "/teacher-course-assignment"
+
+@using MudBlazor
+@using StudentManagement.Client.Models.Teachers
+@using StudentManagement.Client.Models.Courses
+
+@inject StudentManagement.Client.Services.Interfaces.ITeacherService TeacherService
+@inject StudentManagement.Client.Services.Interfaces.ICourseService CourseService
+@inject ISnackbar Snackbar
+
+<PageTitle>Teacher Course Assignment</PageTitle>
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge"
+              Class="mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <MudText Typo="Typo.h4">
+                Teacher Course Assignment
+            </MudText>
+
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary">
+                Drag a teacher and drop them onto a course
+            </MudText>
+        </div>
+
+    </div>
+
+
+    @if (isLoading)
+    {
+        <div class="d-flex flex-column align-items-center justify-content-center py-5">
+
+            <MudProgressCircular Indeterminate="true"
+                                 Color="Color.Primary" />
+
+            <MudText Class="mt-3">
+                Loading teachers and courses...
+            </MudText>
+
+        </div>
+    }
+    else
+    {
+        <MudDropContainer T="TeacherDto"
+                          @ref="dropContainer"
+                          Items="@teachers"
+                          ItemsSelector="@TeacherItemsSelector"
+                          CanDrop="@CanDrop"
+                          ItemDropped="@OnTeacherDropped"
+                          ApplyDropClassesOnDragStarted="true">
+
+            <ChildContent>
+
+                <div class="row g-4">
+
+                    <!-- ============================= -->
+                    <!-- TEACHERS -->
+                    <!-- ============================= -->
+
+                    <div class="col-12 col-md-4">
+
+                        <MudPaper Elevation="2"
+                                  Class="p-4 rounded-3 h-100">
+
+                            <div class="d-flex align-items-center gap-2 mb-4">
+
+                                <MudIcon Icon="@Icons.Material.Filled.People"
+                                         Color="Color.Primary" />
+
+                                <MudText Typo="Typo.h6">
+                                    Teachers
+                                </MudText>
+
+                                <MudChip T="int"
+                                         Size="Size.Small"
+                                         Color="Color.Primary">
+
+                                    @teachers.Count
+
+                                </MudChip>
+
+                            </div>
+
+
+                            <MudDropZone T="TeacherDto"
+                                         Identifier="@TeacherZone"
+                                         Class="p-2">
+
+                                @if (teachers.Count == 0)
+                                {
+                                    <div class="text-center py-5">
+
+                                        <MudText Typo="Typo.body2">
+                                            No teachers available.
+                                        </MudText>
+
+                                    </div>
+                                }
+
+                            </MudDropZone>
+
+                        </MudPaper>
+
+                    </div>
+
+
+                    <!-- ============================= -->
+                    <!-- COURSES -->
+                    <!-- ============================= -->
+
+                    <div class="col-12 col-md-8">
+
+                        <div class="d-flex align-items-center gap-2 mb-4">
+
+                            <MudIcon Icon="@Icons.Material.Filled.MenuBook"
+                                     Color="Color.Primary" />
+
+                            <MudText Typo="Typo.h6">
+                                Courses
+                            </MudText>
+
+                            <MudChip T="int"
+                                     Size="Size.Small">
+
+                                @courses.Count
+
+                            </MudChip>
+
+                        </div>
+
+
+                        @if (courses.Count == 0)
+                        {
+                            <MudPaper Outlined="true"
+                                      Class="p-5 rounded-3 text-center">
+
+                                <MudText>
+                                    No courses available.
+                                </MudText>
+
+                            </MudPaper>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+
+                                @foreach (var course in courses)
+                                {
+                                    <div class="col-12 col-lg-6">
+
+                                        <MudDropZone T="TeacherDto"
+                                                     Identifier="@GetCourseZone(course.Id)"
+                                                     OnlyZone="true"
+                                                     Class="h-100">
+
+                                            <MudCard Elevation="2"
+                                                     Class="rounded-3 h-100">
+
+                                                <MudCardContent Class="p-4">
+
+                                                    <!-- Course Header -->
+
+                                                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                                                        <div>
+
+                                                            <MudText Typo="Typo.overline"
+                                                                     Color="Color.Primary">
+                                                                @course.CourseCode
+                                                            </MudText>
+
+                                                            <MudText Typo="Typo.h6">
+                                                                @course.CourseName
+                                                            </MudText>
+
+                                                        </div>
+
+
+                                                        @if (course.IsActive)
+                                                        {
+                                                            <MudChip T="string"
+                                                                     Size="Size.Small"
+                                                                     Color="Color.Success"
+                                                                     Variant="Variant.Outlined">
+
+                                                                Active
+
+                                                            </MudChip>
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudChip T="string"
+                                                                     Size="Size.Small"
+                                                                     Color="Color.Default"
+                                                                     Variant="Variant.Outlined">
+
+                                                                Inactive
+
+                                                            </MudChip>
+                                                        }
+
+                                                    </div>
+
+
+                                                    <MudDivider Class="mb-3" />
+
+
+                                                    <!-- Course Information -->
+
+                                                    <div class="d-flex gap-4 mb-4">
+
+                                                        <div class="d-flex align-items-center gap-1">
+
+                                                            <MudIcon Icon="@Icons.Material.Filled.Star"
+                                                                     Size="Size.Small" />
+
+                                                            <MudText Typo="Typo.body2">
+                                                                @course.Credits Credits
+                                                            </MudText>
+
+                                                        </div>
+
+
+                                                        <div class="d-flex align-items-center gap-1">
+
+                                                            <MudIcon Icon="@Icons.Material.Filled.Schedule"
+                                                                     Size="Size.Small" />
+
+                                                            <MudText Typo="Typo.body2">
+                                                                @course.Duration
+                                                            </MudText>
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <!-- Assigned Teacher -->
+                                                    @if (course.TeacherId.HasValue)
+                                                    {
+                                                        <MudPaper Outlined="true"
+                                                                  Class="p-3 rounded-3">
+
+                                                            <div class="d-flex justify-content-between align-items-center">
+
+                                                                <div class="d-flex align-items-center gap-3">
+
+                                                                    <MudAvatar Color="Color.Primary"
+                                                                               Size="Size.Medium">
+
+                                                                        <MudIcon Icon="@Icons.Material.Filled.Person" />
+
+                                                                    </MudAvatar>
+
+
+                                                                    <div>
+
+                                                                        <MudText Typo="Typo.caption">
+                                                                            Assigned Teacher
+                                                                        </MudText>
+
+                                                                        <MudText Typo="Typo.subtitle2">
+                                                                            @course.TeacherName
+                                                                        </MudText>
+
+                                                                    </div>
+
+                                                                </div>
+
+
+                                                                <MudTooltip Text="Remove teacher">
+
+                                                                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline"
+                                                                                   Color="Color.Error"
+                                                                                   Size="Size.Small"
+                                                                                   Disabled="@IsCourseBusy(course.Id)"
+                                                                                   OnClick="@(() => RemoveTeacher(course.Id))" />
+
+                                                                </MudTooltip>
+
+                                                            </div>
+
+                                                        </MudPaper>
+                                                    }
+                                                    else
+                                                    {
+                                                        <!-- Empty drop area -->
+
+                                                        <div class="border border-2 border-secondary border-opacity-25 rounded-3 p-4 text-center">
+
+                                                            <MudIcon Icon="@Icons.Material.Filled.PersonAdd"
+                                                                     Size="Size.Large"
+                                                                     Color="Color.Secondary" />
+
+                                                            <MudText Typo="Typo.body2"
+                                                                     Class="mt-2">
+                                                                Drop a teacher here
+                                                            </MudText>
+
+                                                        </div>
+                                                    }
+
+
+                                                    @if (IsCourseBusy(course.Id))
+                                                    {
+                                                        <MudProgressLinear Indeterminate="true"
+                                                                           Color="Color.Primary"
+                                                                           Class="mt-3" />
+                                                    }
+
+                                                </MudCardContent>
+
+                                            </MudCard>
+
+                                        </MudDropZone>
+
+                                    </div>
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </ChildContent>
+
+
+            <!-- ============================= -->
+            <!-- DRAGGABLE TEACHER CARD -->
+            <!-- ============================= -->
+
+            <ItemRenderer>
+
+                <MudCard Elevation="1"
+                         Class="rounded-3 shadow-sm mb-2">
+
+                    <MudCardContent Class="p-3">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <MudAvatar Color="Color.Primary"
+                                       Size="Size.Medium">
+
+                                <MudIcon Icon="@Icons.Material.Filled.Person" />
+
+                            </MudAvatar>
+
+
+                            <div class="flex-grow-1 overflow-hidden">
+
+                                <MudText Typo="Typo.subtitle2">
+                                    @context.FirstName @context.LastName
+                                </MudText>
+
+                                <MudText Typo="Typo.caption"
+                                         Color="Color.Secondary">
+
+                                    @context.Email
+
+                                </MudText>
+
+                            </div>
+
+
+                            <MudIcon Icon="@Icons.Material.Filled.DragIndicator"
+                                     Color="Color.Secondary" />
+
+                        </div>
+
+                    </MudCardContent>
+
+                </MudCard>
+
+            </ItemRenderer>
+
+        </MudDropContainer>
+    }
+
+</MudContainer>
+
+
+@code {
+
+    private const string TeacherZone = "teachers";
+    private const string CourseZonePrefix = "course-";
+
+
+    private List<TeacherDto> teachers = new();
+
+    private List<CourseDto> courses = new();
+
+
+    private readonly HashSet<int> busyCourses = new();
+
+
+    private MudDropContainer<TeacherDto>? dropContainer;
+
+
+    private bool isLoading = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+
+
+            var teacherTask =
+                TeacherService.GetAllAsync();
+
+
+            var courseTask =
+                CourseService.GetAllAsync();
+
+
+            await Task.WhenAll(
+                teacherTask,
+                courseTask);
+
+
+            teachers = await teacherTask;
+
+            courses = await courseTask;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                $"Failed to load data: {ex.Message}",
+                Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private bool TeacherItemsSelector(
+        TeacherDto teacher,
+        string zoneIdentifier)
+    {
+        return zoneIdentifier == TeacherZone;
+    }
+
+
+    private bool CanDrop(
+        TeacherDto teacher,
+        string zoneIdentifier)
+    {
+        return zoneIdentifier.StartsWith(
+            CourseZonePrefix,
+            StringComparison.Ordinal);
+    }
+
+
+    private static string GetCourseZone(
+        int courseId)
+    {
+        return $"{CourseZonePrefix}{courseId}";
+    }
+
+
+    private async Task OnTeacherDropped(
+        MudItemDropInfo<TeacherDto> dropInfo)
+    {
+        var teacher = dropInfo.Item;
+
+
+        if (teacher == null)
+        {
+            return;
+        }
+
+
+        if (!TryGetCourseId(
+                dropInfo.DropzoneIdentifier,
+                out var courseId))
+        {
+            dropContainer?.Refresh();
+
+            return;
+        }
+
+
+        try
+        {
+            busyCourses.Add(courseId);
+
+
+            var updatedCourse =
+                await CourseService.AssignTeacherAsync(
+                    courseId,
+                    teacher.Id);
+
+
+            if (updatedCourse == null)
+            {
+                Snackbar.Add(
+                    "Course or teacher could not be found.",
+                    Severity.Error);
+
+                return;
+            }
+
+
+            var index =
+                courses.FindIndex(
+                    x => x.Id == courseId);
+
+
+            if (index >= 0)
+            {
+                courses[index] = updatedCourse;
+            }
+
+
+            Snackbar.Add(
+                $"{teacher.FirstName} {teacher.LastName} assigned to {updatedCourse.CourseName}.",
+                Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                $"Unable to assign teacher: {ex.Message}",
+                Severity.Error);
+        }
+        finally
+        {
+            busyCourses.Remove(courseId);
+
+
+            dropContainer?.Refresh();
+
+
+            StateHasChanged();
+        }
+    }
+
+
+    private async Task RemoveTeacher(
+        int courseId)
+    {
+        try
+        {
+            busyCourses.Add(courseId);
+
+
+            var removed =
+                await CourseService.RemoveTeacherAsync(
+                    courseId);
+
+
+            if (!removed)
+            {
+                Snackbar.Add(
+                    "Course was not found.",
+                    Severity.Error);
+
+                return;
+            }
+
+
+            var course =
+                courses.FirstOrDefault(
+                    x => x.Id == courseId);
+
+
+            if (course != null)
+            {
+                course.TeacherId = null;
+
+                course.TeacherName = null;
+            }
+
+
+            Snackbar.Add(
+                "Teacher removed from course.",
+                Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                $"Unable to remove teacher: {ex.Message}",
+                Severity.Error);
+        }
+        finally
+        {
+            busyCourses.Remove(courseId);
+
+            StateHasChanged();
+        }
+    }
+
+
+    private static bool TryGetCourseId(
+        string zoneIdentifier,
+        out int courseId)
+    {
+        courseId = 0;
+
+
+        if (string.IsNullOrWhiteSpace(
+                zoneIdentifier))
+        {
+            return false;
+        }
+
+
+        if (!zoneIdentifier.StartsWith(
+                CourseZonePrefix,
+                StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+
+        var idText =
+            zoneIdentifier[
+                CourseZonePrefix.Length..];
+
+
+        return int.TryParse(
+            idText,
+            out courseId);
+    }
+
+
+    private bool IsCourseBusy(
+        int courseId)
+    {
+        return busyCourses.Contains(courseId);
+    }
+}

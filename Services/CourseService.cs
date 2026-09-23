@@ -1,5 +1,6 @@
 ﻿using StudentManagement.Client.Models.Courses;
 using StudentManagement.Client.Services.Interfaces;
+using System.Net.Http;
 using System.Net.Http.Json;
 
 namespace StudentManagement.Client.Services
@@ -47,6 +48,44 @@ namespace StudentManagement.Client.Services
         {
             var response = await _http.DeleteAsync($"api/courses/{id}");
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<CourseDto?> AssignTeacherAsync(
+        int courseId,
+        int teacherId)
+        {
+            var response = await _http.PutAsync(
+                $"api/courses/{courseId}/teacher/{teacherId}",
+                null);
+
+            if (response.StatusCode ==
+                System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content
+                .ReadFromJsonAsync<CourseDto>();
+        }
+
+
+        public async Task<bool> RemoveTeacherAsync(
+            int courseId)
+        {
+            var response = await _http.DeleteAsync(
+                $"api/courses/{courseId}/teacher");
+
+            if (response.StatusCode ==
+                System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return true;
         }
     }
 

@@ -1,0 +1,1310 @@
+﻿@page "/"
+@page "/dashboard"
+
+@using StudentManagement.Client.Models.Dashboard
+@using StudentManagement.Client.Services.Interfaces
+
+@inject IDashboardService DashboardService
+@inject NavigationManager Navigation
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center"
+         style="min-height: 500px;">
+
+        <div class="spinner-border text-primary"
+             role="status">
+
+            <span class="visually-hidden">
+                Loading...
+            </span>
+
+        </div>
+
+    </div>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (dashboard is not null)
+{
+    <div class="container-fluid py-4">
+
+        <!-- =============================== -->
+        <!-- PAGE HEADER -->
+        <!-- =============================== -->
+
+        <div class="mb-4">
+
+            <h2 class="fw-bold text-dark mb-1">
+                Admin Dashboard
+            </h2>
+
+            <p class="text-muted mb-0">
+                Overview of your Student Management System
+            </p>
+
+        </div>
+
+
+        <!-- =============================== -->
+        <!-- STAT CARDS -->
+        <!-- =============================== -->
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3 mb-4">
+
+
+            <!-- TOTAL STUDENTS -->
+
+            <div class="col">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="rounded-circle bg-primary bg-opacity-10
+                                        d-flex align-items-center justify-content-center
+                                        flex-shrink-0"
+                                 style="width:55px; height:55px;">
+
+                                <MudIcon Icon="@Icons.Material.Filled.People"
+                                         Color="Color.Primary"
+                                         Size="Size.Large" />
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Total Students
+                                </div>
+
+                                <h3 class="fw-bold mb-1">
+                                    @dashboard.TotalStudents
+                                </h3>
+
+                                <small class="text-success">
+                                    @dashboard.ActiveStudents active
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL TEACHERS -->
+
+            <div class="col">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="rounded-circle bg-secondary bg-opacity-10
+                                        d-flex align-items-center justify-content-center
+                                        flex-shrink-0"
+                                 style="width:55px; height:55px;">
+
+                                <MudIcon Icon="@Icons.Material.Filled.School"
+                                         Color="Color.Secondary"
+                                         Size="Size.Large" />
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Total Teachers
+                                </div>
+
+                                <h3 class="fw-bold mb-1">
+                                    @dashboard.TotalTeachers
+                                </h3>
+
+                                <small class="text-muted">
+                                    Registered teachers
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL COURSES -->
+
+            <div class="col">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="rounded-circle bg-success bg-opacity-10
+                                        d-flex align-items-center justify-content-center
+                                        flex-shrink-0"
+                                 style="width:55px; height:55px;">
+
+                                <MudIcon Icon="@Icons.Material.Filled.MenuBook"
+                                         Color="Color.Success"
+                                         Size="Size.Large" />
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Total Courses
+                                </div>
+
+                                <h3 class="fw-bold mb-1">
+                                    @dashboard.TotalCourses
+                                </h3>
+
+                                <small class="text-success">
+                                    @dashboard.ActiveCourses active
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVE STUDENTS -->
+
+            <div class="col">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="rounded-circle bg-info bg-opacity-10
+                                        d-flex align-items-center justify-content-center
+                                        flex-shrink-0"
+                                 style="width:55px; height:55px;">
+
+                                <MudIcon Icon="@Icons.Material.Filled.Person"
+                                         Color="Color.Info"
+                                         Size="Size.Large" />
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Active Students
+                                </div>
+
+                                <h3 class="fw-bold mb-1">
+                                    @dashboard.ActiveStudents
+                                </h3>
+
+                                <small class="text-danger">
+                                    @dashboard.InactiveStudents inactive
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVE COURSES -->
+
+            <div class="col">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="rounded-circle bg-warning bg-opacity-10
+                                        d-flex align-items-center justify-content-center
+                                        flex-shrink-0"
+                                 style="width:55px; height:55px;">
+
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                                         Color="Color.Warning"
+                                         Size="Size.Large" />
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Active Courses
+                                </div>
+
+                                <h3 class="fw-bold mb-1">
+                                    @dashboard.ActiveCourses
+                                </h3>
+
+                                <small class="text-danger">
+                                    @dashboard.InactiveCourses inactive
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =============================== -->
+        <!-- CHARTS -->
+        <!-- =============================== -->
+
+        <div class="row g-3 mb-4">
+
+
+            <!-- SYSTEM SUMMARY -->
+
+            <div class="col-12 col-xl-6">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-2 mb-4">
+
+                            <MudIcon Icon="@Icons.Material.Filled.BarChart"
+                                     Color="Color.Primary" />
+
+                            <h5 class="fw-bold mb-0">
+                                System Summary
+                            </h5>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-around
+                                    align-items-end text-center"
+                             style="height:300px;">
+
+
+                            <!-- Students -->
+
+                            <div class="d-flex flex-column align-items-center
+                                        justify-content-end h-100"
+                                 style="width:25%;">
+
+                                <strong class="mb-2">
+                                    @dashboard.TotalStudents
+                                </strong>
+
+                                <div class="bg-primary rounded-top"
+                                     style="@GetBarStyle(dashboard.TotalStudents)">
+                                </div>
+
+                                <span class="small text-muted mt-2">
+                                    Students
+                                </span>
+
+                            </div>
+
+
+                            <!-- Teachers -->
+
+                            <div class="d-flex flex-column align-items-center
+                                        justify-content-end h-100"
+                                 style="width:25%;">
+
+                                <strong class="mb-2">
+                                    @dashboard.TotalTeachers
+                                </strong>
+
+                                <div class="bg-secondary rounded-top"
+                                     style="@GetBarStyle(dashboard.TotalTeachers)">
+                                </div>
+
+                                <span class="small text-muted mt-2">
+                                    Teachers
+                                </span>
+
+                            </div>
+
+
+                            <!-- Courses -->
+
+                            <div class="d-flex flex-column align-items-center
+                                        justify-content-end h-100"
+                                 style="width:25%;">
+
+                                <strong class="mb-2">
+                                    @dashboard.TotalCourses
+                                </strong>
+
+                                <div class="bg-success rounded-top"
+                                     style="@GetBarStyle(dashboard.TotalCourses)">
+                                </div>
+
+                                <span class="small text-muted mt-2">
+                                    Courses
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STUDENT STATUS -->
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+
+                        <div class="d-flex align-items-center gap-2 mb-4">
+
+                            <MudIcon Icon="@Icons.Material.Filled.People"
+                                     Color="Color.Primary" />
+
+                            <h5 class="fw-bold mb-0">
+                                Student Status
+                            </h5>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-center mb-4">
+
+                            <div class="rounded-circle
+                                        d-flex flex-column
+                                        justify-content-center
+                                        align-items-center"
+                                 style="@GetStudentDonutStyle()">
+
+                                <div class="bg-white rounded-circle
+                                            d-flex flex-column
+                                            justify-content-center
+                                            align-items-center"
+                                     style="width:120px; height:120px;">
+
+                                    <h3 class="fw-bold mb-0">
+                                        @StudentActivePercentage%
+                                    </h3>
+
+                                    <span class="small text-muted">
+                                        Active
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span class="bg-success rounded-circle"
+                                      style="width:10px; height:10px;">
+                                </span>
+
+                                <span>
+                                    Active
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @dashboard.ActiveStudents
+                            </strong>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span class="bg-secondary rounded-circle"
+                                      style="width:10px; height:10px;">
+                                </span>
+
+                                <span>
+                                    Inactive
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @dashboard.InactiveStudents
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- COURSE STATUS -->
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+
+                        <div class="d-flex align-items-center gap-2 mb-4">
+
+                            <MudIcon Icon="@Icons.Material.Filled.MenuBook"
+                                     Color="Color.Secondary" />
+
+                            <h5 class="fw-bold mb-0">
+                                Course Status
+                            </h5>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-center mb-4">
+
+                            <div class="rounded-circle
+                                        d-flex flex-column
+                                        justify-content-center
+                                        align-items-center"
+                                 style="@GetCourseDonutStyle()">
+
+                                <div class="bg-white rounded-circle
+                                            d-flex flex-column
+                                            justify-content-center
+                                            align-items-center"
+                                     style="width:120px; height:120px;">
+
+                                    <h3 class="fw-bold mb-0">
+                                        @CourseActivePercentage%
+                                    </h3>
+
+                                    <span class="small text-muted">
+                                        Active
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span class="bg-success rounded-circle"
+                                      style="width:10px; height:10px;">
+                                </span>
+
+                                <span>
+                                    Active
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @dashboard.ActiveCourses
+                            </strong>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span class="bg-secondary rounded-circle"
+                                      style="width:10px; height:10px;">
+                                </span>
+
+                                <span>
+                                    Inactive
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @dashboard.InactiveCourses
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =============================== -->
+        <!-- RECENT STUDENTS + QUICK ACTIONS -->
+        <!-- =============================== -->
+
+        <div class="row g-3">
+
+
+            <!-- RECENT STUDENTS -->
+
+            <div class="col-12 col-xl-8">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+
+                        <!-- Header -->
+
+                        <div class="d-flex flex-wrap
+                                    justify-content-between
+                                    align-items-center
+                                    gap-2 mb-3">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <MudIcon Icon="@Icons.Material.Filled.People"
+                                         Color="Color.Primary" />
+
+                                <h5 class="fw-bold mb-0">
+                                    Recent Students
+                                </h5>
+
+                            </div>
+
+
+                            <button class="btn btn-link text-decoration-none"
+                                    @onclick="@(() => Navigation.NavigateTo("/students"))">
+
+                                View All Students →
+
+                            </button>
+
+                        </div>
+
+
+                        @if (dashboard.RecentStudents.Count == 0)
+                        {
+                            <div class="text-center text-muted py-5">
+
+                                <MudIcon Icon="@Icons.Material.Filled.People"
+                                         Size="Size.Large" />
+
+                                <p class="mt-2 mb-0">
+                                    No students found.
+                                </p>
+
+                            </div>
+                        }
+                        else
+                        {
+
+                            <div class="table-responsive">
+
+                                <table class="table table-hover align-middle">
+
+                                    <thead class="table-light">
+
+                                        <tr>
+
+                                            <th>
+                                                Admission No.
+                                            </th>
+
+                                            <th>
+                                                Name
+                                            </th>
+
+                                            <th>
+                                                Email
+                                            </th>
+
+                                            <th>
+                                                Gender
+                                            </th>
+
+                                            <th>
+                                                Enrollment Date
+                                            </th>
+
+                                            <th>
+                                                Status
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <tbody>
+
+                                        @foreach (var student in dashboard.RecentStudents)
+                                        {
+                                            <tr>
+
+                                                <td>
+
+                                                    <span class="fw-semibold text-primary">
+                                                        @student.AdmissionNumber
+                                                    </span>
+
+                                                </td>
+
+
+                                                <td>
+
+                                                    <div class="d-flex align-items-center gap-2">
+
+                                                        <div class="rounded-circle
+                                                                    bg-primary
+                                                                    text-white
+                                                                    d-flex
+                                                                    align-items-center
+                                                                    justify-content-center
+                                                                    fw-semibold"
+                                                             style="width:35px; height:35px;">
+
+                                                            @GetInitial(student.Name)
+
+                                                        </div>
+
+                                                        <span class="fw-semibold">
+                                                            @student.Name
+                                                        </span>
+
+                                                    </div>
+
+                                                </td>
+
+
+                                                <td class="text-muted">
+                                                    @student.Email
+                                                </td>
+
+
+                                                <td>
+                                                    @student.Gender
+                                                </td>
+
+
+                                                <td>
+                                                    @student.EnrollmentDate.ToString("dd MMM yyyy")
+                                                </td>
+
+
+                                                <td>
+
+                                                    @if (student.IsActive)
+                                                    {
+                                                        <span class="badge rounded-pill
+                                                                     bg-success
+                                                                     bg-opacity-10
+                                                                     text-success
+                                                                     px-3 py-2">
+
+                                                            Active
+
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge rounded-pill
+                                                                     bg-danger
+                                                                     bg-opacity-10
+                                                                     text-danger
+                                                                     px-3 py-2">
+
+                                                            Inactive
+
+                                                        </span>
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+                                        }
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="col-12 col-xl-4">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+
+                        <div class="d-flex align-items-center gap-2 mb-4">
+
+                            <MudIcon Icon="@Icons.Material.Filled.Bolt"
+                                     Color="Color.Primary" />
+
+                            <h5 class="fw-bold mb-0">
+                                Quick Actions
+                            </h5>
+
+                        </div>
+
+
+                        <div class="row g-2">
+
+
+                            <!-- View Students -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/students"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.People"
+                                                 Color="Color.Primary" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                View Students
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Manage records
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Add Student -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/students/add"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.PersonAdd"
+                                                 Color="Color.Secondary" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                Add Student
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Add new student
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Teachers -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/teachers"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.School"
+                                                 Color="Color.Success" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                View Teachers
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Manage teachers
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Add Teacher -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/teachers/add"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.PersonAdd"
+                                                 Color="Color.Secondary" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                Add Teacher
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Add new teacher
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Courses -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/courses"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.MenuBook"
+                                                 Color="Color.Primary" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                View Courses
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Manage courses
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Add Course -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/courses/add"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.AddCircle"
+                                                 Color="Color.Secondary" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                Add Course
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Create course
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Teacher Course -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/teacher-course-assignment"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.Link"
+                                                 Color="Color.Success" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                Teacher-Course
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Assign teachers
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Student Course -->
+
+                            <div class="col-12 col-md-6 col-xl-6">
+
+                                <button class="btn btn-light
+                                               border-0
+                                               rounded-3
+                                               text-start
+                                               w-100 h-100
+                                               p-3"
+                                        @onclick="@(() => Navigation.NavigateTo("/student-course-enrollment"))">
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.GroupAdd"
+                                                 Color="Color.Secondary" />
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                Student-Course
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Enroll students
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+}
+
+
+
+@code {
+
+    private DashboardDto? dashboard;
+
+    private bool isLoading = true;
+
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboard();
+    }
+
+
+    private async Task LoadDashboard()
+    {
+        try
+        {
+            isLoading = true;
+
+            errorMessage = null;
+
+            dashboard = await DashboardService.GetDashboardAsync();
+
+            if (dashboard is null)
+            {
+                errorMessage = "Unable to load dashboard data.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            errorMessage =
+                "An error occurred while loading the dashboard.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+
+    // ===============================
+    // STUDENT ACTIVE PERCENTAGE
+    // ===============================
+
+    private int StudentActivePercentage
+    {
+        get
+        {
+            if (dashboard is null ||
+                dashboard.TotalStudents == 0)
+            {
+                return 0;
+            }
+
+            return (int)Math.Round(
+                (double)dashboard.ActiveStudents
+                / dashboard.TotalStudents
+                * 100);
+        }
+    }
+
+
+
+    // ===============================
+    // COURSE ACTIVE PERCENTAGE
+    // ===============================
+
+    private int CourseActivePercentage
+    {
+        get
+        {
+            if (dashboard is null ||
+                dashboard.TotalCourses == 0)
+            {
+                return 0;
+            }
+
+            return (int)Math.Round(
+                (double)dashboard.ActiveCourses
+                / dashboard.TotalCourses
+                * 100);
+        }
+    }
+
+
+
+    // ===============================
+    // BAR CHART
+    // ===============================
+
+    private string GetBarStyle(int value)
+    {
+        if (dashboard is null)
+        {
+            return "width:70px;height:5px;";
+        }
+
+        var maximum = Math.Max(
+            dashboard.TotalStudents,
+            Math.Max(
+                dashboard.TotalTeachers,
+                dashboard.TotalCourses));
+
+        if (maximum == 0)
+        {
+            return "width:70px;height:5px;";
+        }
+
+        var percentage =
+            (double)value / maximum * 100;
+
+        var height = Math.Max(
+            5,
+            percentage * 2.1);
+
+        return $"width:70px;height:{height}px;";
+    }
+
+
+
+    // ===============================
+    // STUDENT DONUT
+    // ===============================
+
+    private string GetStudentDonutStyle()
+    {
+        return
+            $"width:170px;" +
+            $"height:170px;" +
+            $"background:conic-gradient(" +
+            $"#0d6efd 0% {StudentActivePercentage}%," +
+            $"#6f42c1 {StudentActivePercentage}% 100%);";
+    }
+
+
+
+    // ===============================
+    // COURSE DONUT
+    // ===============================
+
+    private string GetCourseDonutStyle()
+    {
+        return
+            $"width:170px;" +
+            $"height:170px;" +
+            $"background:conic-gradient(" +
+            $"#6f42c1 0% {CourseActivePercentage}%," +
+            $"#dee2e6 {CourseActivePercentage}% 100%);";
+    }
+
+
+
+    // ===============================
+    // STUDENT INITIAL
+    // ===============================
+
+    private string GetInitial(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return "?";
+        }
+
+        return name
+            .Trim()
+            .Substring(0, 1)
+            .ToUpper();
+    }
+}
