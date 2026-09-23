@@ -5,17 +5,25 @@
 @inject StudentManagement.Client.Services.Interfaces.IStudentService StudentService
 @inject NavigationManager Navigation
 
+@using StudentManagement.Client.Models.Courses
+
+@inject StudentManagement.Client.Services.Interfaces.ICourseService CourseService
+
 <PageTitle>Students</PageTitle>
 
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge"
               Class="mt-6">
 
-    <MudGrid Spacing="3" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudGrid Spacing="3"
+             AlignItems="AlignItems.Center"
+             Class="mb-4">
 
-        <!-- Total Students Card -->
+        <!-- Total Students -->
         <MudItem xs="12" sm="4" md="3">
-            <MudCard Class="pa-4">
+
+            <MudCard Class="pa-4 student-total-card">
+
                 <MudStack Row="true"
                           AlignItems="AlignItems.Center"
                           Justify="Justify.SpaceBetween">
@@ -38,40 +46,105 @@
                     </MudStack>
 
                 </MudStack>
+
             </MudCard>
+
         </MudItem>
 
 
-        <!-- Search -->
-        <div class="admin-dashboard-top-right-section">
-            <MudItem xs="12" sm="5" md="6">
-                <MudTextField @bind-Value="searchText"
-                              Placeholder="Search students..."
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Search"
-                              Immediate="true"
-                              Clearable="true"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              FullWidth="true" />
-            </MudItem>
+        <!-- Right Side -->
+        <MudItem xs="12" sm="8" md="9">
+
+            <div class="admin-dashboard-top-right-section">
+
+                <!-- Search -->
+                <div class="student-search">
+
+                    <MudTextField T="string"
+                                  @bind-Value="searchText"
+                                  Placeholder="Search students..."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Clearable="true"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Style="width:100%;" />
+
+                </div>
 
 
-            <!-- Add Student -->
-            <MudItem xs="12" sm="3" md="3">
+                <!-- Status Filter -->
+                <div class="student-filter">
+
+                    <MudSelect T="string"
+                               @bind-Value="statusFilter"
+                               Label="Status"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="width:100%;">
+
+                        <MudSelectItem T="string" Value="@("All")">
+                            All Status
+                        </MudSelectItem>
+
+                        <MudSelectItem T="string" Value="@("Active")">
+                            Active
+                        </MudSelectItem>
+
+                        <MudSelectItem T="string" Value="@("Inactive")">
+                            Inactive
+                        </MudSelectItem>
+
+                    </MudSelect>
+
+                </div>
+
+
+                <!-- Course Filter -->
+                <div class="student-filter">
+
+                    <MudSelect T="string"
+                               @bind-Value="courseFilter"
+                               Label="Course"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="width:100%;">
+
+                        <MudSelectItem T="string" Value="@("All")">
+                            All Courses
+                        </MudSelectItem>
+
+                        @foreach (var course in courses)
+                        {
+                            <MudSelectItem T="string"
+                                           Value="@course.Id.ToString()">
+
+                                @course.CourseName
+
+                            </MudSelectItem>
+                        }
+
+                    </MudSelect>
+
+                </div>
+
+
+                <!-- Add Student -->
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            StartIcon="@Icons.Material.Filled.Add"
                            OnClick="AddStudent"
-                           FullWidth="true"
-                           Size="Size.Large">
+                           Size="Size.Large"
+                           Class="add-student-button">
 
                     Add Student
 
                 </MudButton>
-            </MudItem>
-        </div>
-        
+
+            </div>
+
+        </MudItem>
 
     </MudGrid>
 
@@ -198,17 +271,6 @@
 
 </MudContainer>
 
-<style>
-    .admin-dashboard-top-right-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem; /* Adjust the gap as needed */
-        padding: 20px;
-        border: 1px solid red;
-    }
-</style>
-
 
 @code
 {
@@ -222,9 +284,17 @@
 
     private string searchText = string.Empty;
 
+    private List<CourseDto> courses = new();
+
+    private string statusFilter = "All";
+
+    private string courseFilter = "All";
+
     protected override async Task OnInitializedAsync()
     {
         totalStudents = await StudentService.GetTotalStudentsAsync();
+        courses =
+        await CourseService.GetAllAsync();
         await LoadStudents();
     }
 
@@ -257,13 +327,65 @@
         }
     }
 
-    private IEnumerable<StudentDto> FilteredStudents =>
-    string.IsNullOrWhiteSpace(searchText)
-        ? students
-        : students.Where(s =>
-            s.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-            s.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-            s.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+    private IEnumerable<StudentDto> FilteredStudents
+    {
+        get
+        {
+            IEnumerable<StudentDto> result = students;
+
+
+            // Search Filter
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                result = result.Where(s =>
+                    s.FirstName.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase) ||
+
+                    s.LastName.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase) ||
+
+                    s.Email.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase) ||
+
+                    s.AdmissionNumber.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+
+            // Status Filter
+            if (statusFilter == "Active")
+            {
+                result =
+                    result.Where(s => s.IsActive);
+            }
+            else if (statusFilter == "Inactive")
+            {
+                result =
+                    result.Where(s => !s.IsActive);
+            }
+
+
+            // Course Filter
+            if (courseFilter != "All")
+            {
+                if (int.TryParse(
+                    courseFilter,
+                    out int courseId))
+                {
+                    result =
+                        result.Where(
+                            s => s.CourseId == courseId);
+                }
+            }
+
+
+            return result;
+        }
+    }
 
     private void EditStudent(int id)
     {

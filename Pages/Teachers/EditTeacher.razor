@@ -1,0 +1,482 @@
+﻿@page "/teachers/edit/{Id:int}"
+
+@using Microsoft.AspNetCore.Authorization
+@using StudentManagement.Client.Models.Teachers
+@using StudentManagement.Client.Services.Interfaces
+
+@attribute [Authorize]
+
+@inject ITeacherService TeacherService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+
+<PageTitle>Edit Teacher</PageTitle>
+
+
+<div class="teacher-edit-page">
+
+    @if (isLoading)
+    {
+        <div class="loading-container">
+
+            <MudProgressCircular Indeterminate="true"
+                                 Color="Color.Primary" />
+
+            <MudText Typo="Typo.body1">
+                Loading teacher...
+            </MudText>
+
+        </div>
+    }
+    else if (teacher == null)
+    {
+        <div class="not-found-container">
+
+            <MudIcon Icon="@Icons.Material.Filled.ErrorOutline"
+                     Size="Size.Large"
+                     Color="Color.Error" />
+
+            <MudText Typo="Typo.h5">
+                Teacher not found
+            </MudText>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Cancel">
+                Back to Teachers
+            </MudButton>
+
+        </div>
+    }
+    else
+    {
+        <div class="form-header">
+
+            <MudButton Variant="Variant.Text"
+                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                       OnClick="Cancel"
+                       Class="back-button">
+                Back to Teachers
+            </MudButton>
+
+
+            <MudText Typo="Typo.h4"
+                     Class="form-title">
+                Edit Teacher
+            </MudText>
+
+
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary">
+
+                Update teacher information
+
+            </MudText>
+
+        </div>
+
+
+        <MudPaper Elevation="0"
+                  Class="teacher-form-card">
+
+            <EditForm Model="@teacher"
+                      OnValidSubmit="UpdateTeacher">
+
+                <DataAnnotationsValidator />
+
+
+                <!-- Teacher Information -->
+
+                <div class="teacher-summary">
+
+                    <MudAvatar Color="Color.Primary"
+                               Size="Size.Large">
+
+                        @GetInitials()
+
+                    </MudAvatar>
+
+
+                    <div>
+
+                        <MudText Typo="Typo.h6">
+                            @teacher.FirstName @teacher.LastName
+                        </MudText>
+
+                        <MudText Typo="Typo.body2"
+                                 Color="Color.Secondary">
+                            Teacher ID: #@Id
+                        </MudText>
+
+                    </div>
+
+                </div>
+
+
+                <MudDivider Class="form-divider" />
+
+
+                <!-- Personal Information -->
+
+                <div class="form-section">
+
+                    <MudText Typo="Typo.h6"
+                             Class="section-title">
+                        Personal Information
+                    </MudText>
+
+                    <MudText Typo="Typo.body2"
+                             Color="Color.Secondary"
+                             Class="section-description">
+                        Update the teacher's personal details
+                    </MudText>
+
+
+                    <MudGrid Spacing="3">
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudTextField T="string"
+                                          Label="First Name"
+                                          @bind-Value="teacher.FirstName"
+                                          For="@(() => teacher.FirstName)"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                           />
+
+                        </MudItem>
+
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudTextField T="string"
+                                          Label="Last Name"
+                                          @bind-Value="teacher.LastName"
+                                          For="@(() => teacher.LastName)"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                           />
+
+                        </MudItem>
+
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudTextField T="string"
+                                          Label="Email"
+                                          @bind-Value="teacher.Email"
+                                          For="@(() => teacher.Email)"
+                                          InputType="InputType.Email"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Email"
+                                           />
+
+                        </MudItem>
+
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudTextField T="string"
+                                          Label="Phone"
+                                          @bind-Value="teacher.Phone"
+                                          For="@(() => teacher.Phone)"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Phone"
+                                           />
+
+                        </MudItem>
+
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudDatePicker Label="Date of Birth"
+                                           @bind-Date="teacher.DateOfBirth"
+                                           Variant="Variant.Outlined"
+                                           />
+
+                        </MudItem>
+
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudSelect T="string"
+                                       Label="Gender"
+                                       @bind-Value="teacher.Gender"
+                                       For="@(() => teacher.Gender)"
+                                       Variant="Variant.Outlined"
+                                       Required="true"
+                                       >
+
+                                <MudSelectItem T="string"
+                                               Value="@("Male")">
+                                    Male
+                                </MudSelectItem>
+
+                                <MudSelectItem T="string"
+                                               Value="@("Female")">
+                                    Female
+                                </MudSelectItem>
+
+                                <MudSelectItem T="string"
+                                               Value="@("Other")">
+                                    Other
+                                </MudSelectItem>
+
+                            </MudSelect>
+
+                        </MudItem>
+
+                    </MudGrid>
+
+                </div>
+
+
+                <MudDivider Class="form-divider" />
+
+
+                <!-- Employment -->
+
+                <div class="form-section">
+
+                    <MudText Typo="Typo.h6"
+                             Class="section-title">
+                        Employment Information
+                    </MudText>
+
+                    <MudText Typo="Typo.body2"
+                             Color="Color.Secondary"
+                             Class="section-description">
+                        Manage joining date and teacher status
+                    </MudText>
+
+
+                    <MudGrid Spacing="3">
+
+                        <MudItem xs="12" sm="6">
+
+                            <MudDatePicker Label="Join Date"
+                                           @bind-Date="teacher.JoinDate"
+                                           Variant="Variant.Outlined"
+                                           Required="true"
+                                           />
+
+                        </MudItem>
+
+
+                        <MudItem xs="12" sm="6">
+
+                            <div class="status-field">
+
+                                <MudSwitch T="bool"
+                                           @bind-Value="teacher.IsActive"
+                                           Color="Color.Primary"
+                                           Label="Active Teacher" />
+
+                                <MudText Typo="Typo.caption"
+                                         Color="Color.Secondary">
+
+                                    Disable this if the teacher is no longer active.
+
+                                </MudText>
+
+                            </div>
+
+                        </MudItem>
+
+                    </MudGrid>
+
+                </div>
+
+
+                <!-- Actions -->
+
+                <div class="form-actions">
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               Disabled="@isSaving"
+                               OnClick="Cancel">
+                        Cancel
+                    </MudButton>
+
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               Disabled="@isSaving">
+
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true" />
+
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save Changes</span>
+                        }
+
+                    </MudButton>
+
+                </div>
+
+            </EditForm>
+
+        </MudPaper>
+    }
+
+</div>
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+
+    private UpdateTeacherDto? teacher;
+
+    private bool isLoading = true;
+
+    private bool isSaving;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadTeacher();
+    }
+
+
+    private async Task LoadTeacher()
+    {
+        try
+        {
+            isLoading = true;
+
+            var existingTeacher =
+                await TeacherService.GetByIdAsync(Id);
+
+            if (existingTeacher == null)
+            {
+                teacher = null;
+                return;
+            }
+
+            teacher =
+                new UpdateTeacherDto
+                {
+                    FirstName =
+                        existingTeacher.FirstName,
+
+                    LastName =
+                        existingTeacher.LastName,
+
+                    Email =
+                        existingTeacher.Email,
+
+                    DateOfBirth =
+                        existingTeacher.DateOfBirth,
+
+                    Gender =
+                        existingTeacher.Gender,
+
+                    Phone =
+                        existingTeacher.Phone,
+
+                    JoinDate =
+                        existingTeacher.JoinDate,
+
+                    IsActive =
+                        existingTeacher.IsActive
+                };
+        }
+        catch (Exception)
+        {
+            Snackbar.Add(
+                "Failed to load teacher.",
+                Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private async Task UpdateTeacher()
+    {
+        if (teacher == null || isSaving)
+        {
+            return;
+        }
+
+        try
+        {
+            isSaving = true;
+
+            var result =
+                await TeacherService.UpdateAsync(
+                    Id,
+                    teacher);
+
+            if (result == null)
+            {
+                Snackbar.Add(
+                    "Unable to update teacher.",
+                    Severity.Error);
+
+                return;
+            }
+
+            Snackbar.Add(
+                "Teacher updated successfully.",
+                Severity.Success);
+
+            Navigation.NavigateTo("/teachers");
+        }
+        catch (Exception)
+        {
+            Snackbar.Add(
+                "An error occurred while updating the teacher.",
+                Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/teachers");
+    }
+
+
+    private string GetInitials()
+    {
+        if (teacher == null)
+        {
+            return "";
+        }
+
+        var first =
+            string.IsNullOrWhiteSpace(teacher.FirstName)
+                ? ""
+                : teacher.FirstName[..1];
+
+        var last =
+            string.IsNullOrWhiteSpace(teacher.LastName)
+                ? ""
+                : teacher.LastName[..1];
+
+        return $"{first}{last}".ToUpper();
+    }
+}

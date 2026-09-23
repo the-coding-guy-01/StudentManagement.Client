@@ -1,0 +1,230 @@
+﻿<style >
+/* =========================
+       PAGE
+       ========================= */
+.mud-container {
+    padding-top: 8px;
+    padding-bottom: 32px;
+}
+
+
+/* =========================
+       TOTAL STUDENTS CARD
+       ========================= */
+
+.mud-card {
+    border-radius: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .mud-card:hover {
+        transform: translateY(-2px);
+    }
+
+.student-total-card {
+    border-radius: 14px;
+    min-height: 105px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .student-total-card:hover {
+        transform: translateY(-2px);
+    }
+
+
+/* =========================
+       TOP RIGHT SECTION
+       ========================= */
+
+.admin-dashboard-top-right-section {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+
+/* =========================
+       SEARCH
+       ========================= */
+
+.student-search {
+    flex: 1;
+    min-width: 240px;
+    max-width: 420px;
+}
+
+
+/* =========================
+       FILTERS
+       ========================= */
+
+.student-filter {
+    width: 165px;
+    flex-shrink: 0;
+}
+
+
+/* =========================
+       ADD STUDENT BUTTON
+       ========================= */
+
+.add-student-button {
+    min-width: 155px;
+    height: 44px;
+    white-space: nowrap;
+    border-radius: 8px;
+    text-transform: none;
+    font-weight: 600;
+}
+
+
+/* =========================
+       TABLE
+       ========================= */
+
+.mud-table-container {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.mud-table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.mud-table-head {
+    background: rgba(63, 81, 181, 0.06);
+}
+
+    .mud-table-head .mud-table-cell {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+.mud-table-row {
+    transition: background-color 0.15s ease;
+}
+
+    .mud-table-row:hover {
+        background: rgba(63, 81, 181, 0.04);
+    }
+
+.mud-table-cell {
+    vertical-align: middle;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+
+    /* =========================
+       ADMISSION NUMBER
+       ========================= */
+
+    .mud-table-cell:nth-child(2) {
+        font-weight: 600;
+    }
+
+
+/* =========================
+       STATUS CHIP
+       ========================= */
+
+.mud-chip {
+    min-width: 68px;
+    justify-content: center;
+    font-weight: 500;
+}
+
+
+/* =========================
+       EDIT BUTTON
+       ========================= */
+
+.mud-icon-button {
+    transition: transform 0.15s ease;
+}
+
+    .mud-icon-button:hover {
+        transform: scale(1.08);
+    }
+
+
+/* =========================
+       ALERTS
+       ========================= */
+
+.mud-alert {
+    border-radius: 10px;
+    margin-top: 16px;
+}
+
+
+/* =========================
+       LOADING
+       ========================= */
+
+.mud-progress-circular {
+    margin-top: 20px;
+}
+
+
+/* =========================
+       TABLET
+       ========================= */
+
+@@media (max-width: 960px) {
+
+    .admin-dashboard-top-right-section {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .student-search {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+
+    .student-filter {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .add-student-button {
+        min-width: 150px;
+    }
+}
+
+
+/* =========================
+       MOBILE
+       ========================= */
+
+@@media (max-width: 600px) {
+
+    .admin-dashboard-top-right-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .student-search,
+    .student-filter,
+    .add-student-button {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .add-student-button {
+        height: 46px;
+    }
+
+    .mud-table-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+</style >

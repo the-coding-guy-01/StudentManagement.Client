@@ -1,16 +1,12 @@
-﻿namespace StudentManagement.Client.Models.Students
+﻿namespace StudentManagement.Client.Models.Teachers
 {
-    public class StudentDto
+    public class TeacherDto
     {
         public int Id { get; set; }
-
-        public string AdmissionNumber { get; set; } = string.Empty;
 
         public string FirstName { get; set; } = string.Empty;
 
         public string LastName { get; set; } = string.Empty;
-
-        public string FullName { get; set; } = string.Empty;
 
         public string Email { get; set; } = string.Empty;
 
@@ -20,12 +16,8 @@
 
         public string Phone { get; set; } = string.Empty;
 
-        public DateTime EnrollmentDate { get; set; }
+        public DateTime JoinDate { get; set; }
 
         public bool IsActive { get; set; }
-
-        public int? CourseId { get; set; }
-
-        public string? CourseName { get; set; }
     }
 }

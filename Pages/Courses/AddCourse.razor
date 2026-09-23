@@ -1,0 +1,264 @@
+﻿@page "/courses/add"
+
+@using StudentManagement.Client.Models.Courses
+@using StudentManagement.Client.Models.Teachers
+@using StudentManagement.Client.Services.Interfaces
+
+@inject ICourseService CourseService
+@inject ITeacherService TeacherService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Add Course</PageTitle>
+
+
+<div class="container py-4">
+
+    <div class="mx-auto" style="max-width: 900px;">
+
+        <!-- Header -->
+        <div class="mb-4">
+
+            <MudText Typo="Typo.h4">
+                Add Course
+            </MudText>
+
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary">
+                Create a new course.
+            </MudText>
+
+        </div>
+
+
+        <!-- Form Card -->
+        <MudPaper Elevation="1"
+                  Class="p-4 rounded-4">
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error"
+                          Class="mb-4">
+                    @errorMessage
+                </MudAlert>
+            }
+
+
+            <EditForm Model="@course"
+                      OnValidSubmit="SaveCourse">
+
+                <DataAnnotationsValidator />
+
+
+                <MudGrid Spacing="3">
+
+                    <!-- Course Name -->
+                    <MudItem xs="12" md="6">
+
+                        <MudTextField T="string"
+                                      Label="Course Name"
+                                      @bind-Value="course.CourseName"
+                                      For="@(() => course.CourseName)"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="Course name is required."
+                                      Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Teacher -->
+                    <MudItem xs="12" md="6">
+
+                        <MudSelect T="int?"
+                                   Label="Teacher"
+                                   @bind-Value="course.TeacherId"
+                                   Variant="Variant.Outlined"
+                                   Required="true"
+                                   RequiredError="Teacher is required."
+                                   Style="width:100%;">
+
+                            @foreach (var teacher in teachers)
+                            {
+                                <MudSelectItem T="int?"
+                                               Value="@((int?)teacher.Id)">
+
+                                    @teacher.FirstName @teacher.LastName
+
+                                </MudSelectItem>
+                            }
+
+                        </MudSelect>
+
+                    </MudItem>
+
+
+                    <!-- Credits -->
+                    <MudItem xs="12" md="6">
+
+                        <MudNumericField T="int"
+                                         Label="Credits"
+                                         @bind-Value="course.Credits"
+                                         Variant="Variant.Outlined"
+                                         Min="1"
+                                         Max="20"
+                                         Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Duration -->
+                    <MudItem xs="12" md="6">
+
+                        <MudNumericField T="int"
+                                         Label="Duration"
+                                         @bind-Value="course.Duration"
+                                         Variant="Variant.Outlined"
+                                         Min="1"
+                                         Max="120"
+                                         Style="width:100%;" />
+
+                    </MudItem>
+
+
+                    <!-- Description -->
+                    <MudItem xs="12">
+
+                        <MudTextField T="string"
+                                      Label="Description"
+                                      @bind-Value="course.Description"
+                                      Variant="Variant.Outlined"
+                                      Lines="5"
+                                      Style="width:100%;" />
+
+                    </MudItem>
+
+                </MudGrid>
+
+
+                <!-- Actions -->
+                <div class="d-flex flex-column-reverse flex-sm-row justify-content-end align-items-stretch align-items-sm-center gap-2 mt-4 pt-3 border-top">
+
+                    <MudButton Variant="Variant.Text"
+                               Disabled="@isSaving"
+                               OnClick="Cancel">
+
+                        Cancel
+
+                    </MudButton>
+
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@isSaving"
+                               StartIcon="@Icons.Material.Filled.Save">
+
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="me-2" />
+
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Create Course</span>
+                        }
+
+                    </MudButton>
+
+                </div>
+
+            </EditForm>
+
+        </MudPaper>
+
+    </div>
+
+</div>
+
+
+@code
+{
+    private CreateCourseDto course = new();
+
+    private List<TeacherDto> teachers = new();
+
+    private bool isSaving;
+
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            teachers =
+                await TeacherService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            errorMessage =
+                "Teachers could not be loaded.";
+        }
+    }
+
+
+    private async Task SaveCourse()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+
+        try
+        {
+            isSaving = true;
+
+            errorMessage = null;
+
+
+            var createdCourse =
+                await CourseService.CreateAsync(course);
+
+
+            if (createdCourse == null)
+            {
+                errorMessage =
+                    "Course could not be created.";
+
+                return;
+            }
+
+
+            Snackbar.Add(
+                $"Course {createdCourse.CourseCode} created successfully.",
+                Severity.Success);
+
+
+            Navigation.NavigateTo("/courses");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            errorMessage =
+                "An error occurred while creating the course.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/courses");
+    }
+}

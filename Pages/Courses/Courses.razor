@@ -1,0 +1,458 @@
+﻿@page "/courses"
+
+@using StudentManagement.Client.Models.Courses
+@using StudentManagement.Client.Services.Interfaces
+
+@inject ICourseService CourseService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Courses</PageTitle>
+
+
+<div class="container-fluid py-3">
+
+    <!-- TOP SECTION -->
+    <MudGrid Spacing="3"
+             AlignItems="AlignItems.Center"
+             Class="mb-5">
+
+        <!-- Total Courses -->
+        <MudItem xs="12" sm="4" md="3">
+
+            <MudCard Class="p-4 rounded-4"
+                     Elevation="1">
+
+                <MudStack Row="true"
+                          AlignItems="AlignItems.Center"
+                          Justify="Justify.SpaceBetween">
+
+                    <!-- Icon -->
+                    <div class="d-flex align-items-center justify-content-center">
+
+                        <MudIcon Icon="@Icons.Material.Filled.MenuBook"
+                                 Size="Size.Large"
+                                 Color="Color.Primary" />
+
+                    </div>
+
+
+                    <!-- Count -->
+                    <div class="text-end">
+
+                        <MudText Typo="Typo.body2">
+                            Total Courses
+                        </MudText>
+
+                        <MudText Typo="Typo.h4"
+                                 Class="fw-bold">
+
+                            @courses.Count
+
+                        </MudText>
+
+                    </div>
+
+                </MudStack>
+
+            </MudCard>
+
+        </MudItem>
+
+
+        <!-- Search / Filter / Add -->
+        <MudItem xs="12" sm="8" md="9">
+
+            <div class="d-flex flex-column flex-md-row
+                        align-items-stretch align-items-md-center
+                        justify-content-end gap-3 w-100">
+
+                <!-- Search -->
+                <div class="flex-grow-1">
+
+                    <MudTextField T="string"
+                                  @bind-Value="searchText"
+                                  Placeholder="Search courses..."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Clearable="true"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Style="width:100%;" />
+
+                </div>
+
+
+                <!-- Status Filter -->
+                <div class="flex-shrink-0"
+                     style="min-width:170px;">
+
+                    <MudSelect T="string"
+                               @bind-Value="statusFilter"
+                               Label="Status"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="width:100%;">
+
+                        <MudSelectItem T="string"
+                                       Value="@("All")">
+                            All Status
+                        </MudSelectItem>
+
+                        <MudSelectItem T="string"
+                                       Value="@("Active")">
+                            Active
+                        </MudSelectItem>
+
+                        <MudSelectItem T="string"
+                                       Value="@("Inactive")">
+                            Inactive
+                        </MudSelectItem>
+
+                    </MudSelect>
+
+                </div>
+
+
+                <!-- Add Course -->
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddCourse"
+                           Size="Size.Large"
+                           Class="flex-shrink-0">
+
+                    Add Course
+
+                </MudButton>
+
+            </div>
+
+        </MudItem>
+
+    </MudGrid>
+
+
+    <!-- CONTENT -->
+    @if (isLoading)
+    {
+        <div class="d-flex flex-column
+                        align-items-center
+                        justify-content-center
+                        gap-3 p-5">
+
+            <MudProgressCircular Indeterminate="true"
+                                 Color="Color.Primary" />
+
+            <MudText Typo="Typo.body2">
+                Loading courses...
+            </MudText>
+
+        </div>
+    }
+
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @errorMessage
+        </MudAlert>
+    }
+
+    else if (!FilteredCourses.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No courses found.
+        </MudAlert>
+    }
+
+    else
+    {
+        <!-- Table -->
+        <MudPaper Elevation="1"
+                  Class="rounded-4 overflow-hidden">
+
+            <MudTable Items="FilteredCourses"
+                      Hover="true"
+                      Striped="true"
+                      Dense="false">
+
+                <HeaderContent>
+
+                    <MudTh>Code</MudTh>
+
+                    <MudTh>Course Name</MudTh>
+
+                    <MudTh>Description</MudTh>
+
+                    <MudTh>Credits</MudTh>
+
+                    <MudTh>Duration</MudTh>
+
+                    <MudTh>Teacher</MudTh>
+
+                    <MudTh>Status</MudTh>
+
+                    <MudTh>Actions</MudTh>
+
+                </HeaderContent>
+
+
+                <RowTemplate>
+
+                    <!-- Code -->
+                    <MudTd DataLabel="Code">
+
+                        <span class="fw-semibold">
+                            @context.CourseCode
+                        </span>
+
+                    </MudTd>
+
+
+                    <!-- Course Name -->
+                    <MudTd DataLabel="Course Name">
+
+                        <MudText Typo="Typo.body1"
+                                 Class="fw-semibold">
+
+                            @context.CourseName
+
+                        </MudText>
+
+                    </MudTd>
+
+
+                    <!-- Description -->
+                    <MudTd DataLabel="Description">
+
+                        @if (string.IsNullOrWhiteSpace(context.Description))
+                        {
+                            <span class="opacity-50">
+                                —
+                            </span>
+                        }
+                        else
+                        {
+                            @context.Description
+                        }
+
+                    </MudTd>
+
+
+                    <!-- Credits -->
+                    <MudTd DataLabel="Credits">
+
+                        @context.Credits
+
+                    </MudTd>
+
+
+                    <!-- Duration -->
+                    <MudTd DataLabel="Duration">
+
+                        @context.Duration
+
+                    </MudTd>
+
+
+                    <!-- Teacher -->
+                    <MudTd DataLabel="Teacher">
+
+                        @if (!string.IsNullOrWhiteSpace(context.TeacherName))
+                        {
+                            <span>
+                                @context.TeacherName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="opacity-50">
+                                Not Assigned
+                            </span>
+                        }
+
+                    </MudTd>
+
+
+                    <!-- Status -->
+                    <MudTd DataLabel="Status">
+
+                        @if (context.IsActive)
+                        {
+                            <MudChip T="string"
+                                     Color="Color.Success"
+                                     Size="Size.Small">
+
+                                Active
+
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string"
+                                     Color="Color.Error"
+                                     Size="Size.Small">
+
+                                Inactive
+
+                            </MudChip>
+                        }
+
+                    </MudTd>
+
+
+                    <!-- Actions -->
+                    <MudTd DataLabel="Actions">
+
+                        <div class="d-flex align-items-center gap-1">
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           OnClick="@(() => EditCourse(context.Id))" />
+
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteCourse(context.Id))" />
+
+                        </div>
+
+                    </MudTd>
+
+                </RowTemplate>
+
+            </MudTable>
+
+        </MudPaper>
+    }
+
+</div>
+
+
+@code
+{
+    private List<CourseDto> courses = new();
+
+    private bool isLoading = true;
+
+    private string? errorMessage;
+
+    private string searchText = string.Empty;
+
+    private string statusFilter = "All";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCourses();
+    }
+
+
+    private async Task LoadCourses()
+    {
+        try
+        {
+            isLoading = true;
+
+            errorMessage = null;
+
+            courses =
+                await CourseService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            errorMessage =
+                "Courses could not be loaded.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private IEnumerable<CourseDto> FilteredCourses
+    {
+        get
+        {
+            IEnumerable<CourseDto> result = courses;
+
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                result = result.Where(c =>
+                    c.CourseName.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    c.CourseCode.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    (c.Description?.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase) ?? false)
+                    ||
+                    (c.TeacherName?.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+
+            if (statusFilter == "Active")
+            {
+                result =
+                    result.Where(c => c.IsActive);
+            }
+            else if (statusFilter == "Inactive")
+            {
+                result =
+                    result.Where(c => !c.IsActive);
+            }
+
+
+            return result;
+        }
+    }
+
+
+    private void AddCourse()
+    {
+        Navigation.NavigateTo("/courses/add");
+    }
+
+
+    private void EditCourse(int id)
+    {
+        Navigation.NavigateTo(
+            $"/courses/edit/{id}");
+    }
+
+
+    private async Task DeleteCourse(int id)
+    {
+        try
+        {
+            await CourseService.DeleteAsync(id);
+
+            Snackbar.Add(
+                "Course deleted successfully.",
+                Severity.Success);
+
+            await LoadCourses();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            Snackbar.Add(
+                "Course could not be deleted.",
+                Severity.Error);
+        }
+    }
+}

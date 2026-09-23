@@ -47,5 +47,9 @@ builder.Services.AddScoped<
     IStudentService,
     StudentService>();
 
+builder.Services.AddScoped<ICourseService, CourseService>();
+
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+
 
 await builder.Build().RunAsync();

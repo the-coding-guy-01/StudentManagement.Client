@@ -1,0 +1,456 @@
+﻿@page "/teachers"
+
+@using Microsoft.AspNetCore.Authorization
+@using StudentManagement.Client.Models.Teachers
+@using StudentManagement.Client.Services.Interfaces
+
+@attribute [Authorize]
+
+@inject ITeacherService TeacherService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+
+<PageTitle>Teachers</PageTitle>
+
+
+<div class="teachers-page">
+
+    <!-- Header -->
+    <div class="teachers-header">
+
+        <div>
+            <MudText Typo="Typo.h4"
+                     Class="page-title">
+                Teachers
+            </MudText>
+
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary">
+                Manage teachers registered in the system
+            </MudText>
+        </div>
+
+    </div>
+
+
+    <!-- Top Section -->
+    <MudGrid Spacing="3"
+             Class="teachers-top-section">
+
+        <!-- Total Teachers -->
+        <MudItem xs="12" md="3">
+
+            <MudPaper Elevation="0"
+                      Class="teacher-stat-card">
+
+                <MudStack Row="true"
+                          AlignItems="AlignItems.Center"
+                          Spacing="3">
+
+                    <div class="stat-icon">
+                        <MudIcon Icon="@Icons.Material.Filled.School"
+                                 Size="Size.Large"
+                                 Color="Color.Primary" />
+                    </div>
+
+                    <div>
+
+                        <MudText Typo="Typo.caption"
+                                 Class="stat-label">
+                            Total Teachers
+                        </MudText>
+
+                        <MudText Typo="Typo.h4"
+                                 Class="stat-value">
+                            @totalTeachers
+                        </MudText>
+
+                    </div>
+
+                </MudStack>
+
+            </MudPaper>
+
+        </MudItem>
+
+
+        <!-- Search + Add -->
+        <MudItem xs="12" md="9">
+
+            <div class="teacher-actions">
+
+                <div class="teacher-search">
+
+                    <MudTextField T="string"
+                                  @bind-Value="searchText"
+                                  Placeholder="Search teachers..."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Clearable="true"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="search-field" />
+
+                </div>
+
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Size="Size.Large"
+                           OnClick="AddTeacher"
+                           Class="add-teacher-button">
+
+                    Add Teacher
+
+                </MudButton>
+
+            </div>
+
+        </MudItem>
+
+    </MudGrid>
+
+
+    <!-- Teacher Table -->
+    <MudPaper Elevation="0"
+              Class="teachers-table-container">
+
+        @if (isLoading)
+        {
+            <div class="loading-container">
+
+                <MudProgressCircular Indeterminate="true"
+                                     Color="Color.Primary" />
+
+                <MudText Typo="Typo.body1">
+                    Loading teachers...
+                </MudText>
+
+            </div>
+        }
+        else if (!FilteredTeachers.Any())
+        {
+            <div class="empty-container">
+
+                <MudIcon Icon="@Icons.Material.Filled.PersonOff"
+                         Size="Size.Large"
+                         Color="Color.Secondary" />
+
+                <MudText Typo="Typo.h6">
+                    No teachers found
+                </MudText>
+
+                <MudText Typo="Typo.body2"
+                         Color="Color.Secondary">
+
+                    @if (string.IsNullOrWhiteSpace(searchText))
+                    {
+                        <span>
+                            Add your first teacher to get started.
+                        </span>
+                    }
+                    else
+                    {
+                        <span>
+                            No teachers match your search.
+                        </span>
+                    }
+
+                </MudText>
+
+            </div>
+        }
+        else
+        {
+            <MudTable Items="@FilteredTeachers"
+                      Hover="true"
+                      Breakpoint="Breakpoint.Sm"
+                      Elevation="0"
+                      Class="teachers-table">
+
+                <HeaderContent>
+
+                    <MudTh>ID</MudTh>
+
+                    <MudTh>Name</MudTh>
+
+                    <MudTh>Email</MudTh>
+
+                    <MudTh>Phone</MudTh>
+
+                    <MudTh>Gender</MudTh>
+
+                    <MudTh>Join Date</MudTh>
+
+                    <MudTh>Status</MudTh>
+
+                    <MudTh>Actions</MudTh>
+
+                </HeaderContent>
+
+
+                <RowTemplate>
+
+                    <MudTd DataLabel="ID">
+                        #@context.Id
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Name">
+
+                        <div class="teacher-name">
+
+                            <MudAvatar Color="Color.Primary"
+                                       Size="Size.Small">
+                                @GetInitials(context)
+                            </MudAvatar>
+
+                            <span>
+                                @context.FirstName @context.LastName
+                            </span>
+
+                        </div>
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Email">
+                        @context.Email
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Phone">
+                        @context.Phone
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Gender">
+                        @context.Gender
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Join Date">
+
+                        @(context.JoinDate.ToString("dd MMM yyyy"))
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Status">
+
+                        @if (context.IsActive)
+                        {
+                            <MudChip T="string"
+                                     Size="Size.Small"
+                                     Color="Color.Success"
+                                     Variant="Variant.Outlined">
+                                Active
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string"
+                                     Size="Size.Small"
+                                     Color="Color.Error"
+                                     Variant="Variant.Outlined">
+                                Inactive
+                            </MudChip>
+                        }
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Actions">
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       OnClick="@(() => EditTeacher(context.Id))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => DeleteTeacher(context))" />
+
+                    </MudTd>
+
+                </RowTemplate>
+
+            </MudTable>
+        }
+
+    </MudPaper>
+
+</div>
+
+
+@code {
+
+    private List<TeacherDto> teachers = new();
+
+    private bool isLoading = true;
+
+    private string searchText = string.Empty;
+
+    private int totalTeachers;
+
+
+    private IEnumerable<TeacherDto> FilteredTeachers
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                return teachers;
+            }
+
+            var search = searchText.Trim();
+
+            return teachers.Where(t =>
+                t.Id.ToString()
+                    .Contains(search,
+                        StringComparison.OrdinalIgnoreCase)
+
+                ||
+
+                t.FirstName
+                    .Contains(search,
+                        StringComparison.OrdinalIgnoreCase)
+
+                ||
+
+                t.LastName
+                    .Contains(search,
+                        StringComparison.OrdinalIgnoreCase)
+
+                ||
+
+                $"{t.FirstName} {t.LastName}"
+                    .Contains(search,
+                        StringComparison.OrdinalIgnoreCase)
+
+                ||
+
+                t.Email
+                    .Contains(search,
+                        StringComparison.OrdinalIgnoreCase)
+
+                ||
+
+                t.Phone
+                    .Contains(search,
+                        StringComparison.OrdinalIgnoreCase)
+            );
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTeachers();
+    }
+
+
+    private async Task LoadTeachers()
+    {
+        try
+        {
+            isLoading = true;
+
+            teachers =
+                await TeacherService.GetAllAsync();
+
+            totalTeachers =
+                await TeacherService.GetTotalTeachersAsync();
+        }
+        catch (Exception)
+        {
+            Snackbar.Add(
+                "Failed to load teachers.",
+                Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private void AddTeacher()
+    {
+        Navigation.NavigateTo("/teachers/add");
+    }
+
+
+    private void EditTeacher(int id)
+    {
+        Navigation.NavigateTo(
+            $"/teachers/edit/{id}");
+    }
+
+
+    private async Task DeleteTeacher(
+        TeacherDto teacher)
+    {
+        var confirmed =
+            await DialogService.ShowMessageBoxAsync(
+                "Delete Teacher",
+                $"Are you sure you want to delete {teacher.FirstName} {teacher.LastName}?",
+                yesText: "Delete",
+                cancelText: "Cancel");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        try
+        {
+            var deleted =
+                await TeacherService.DeleteAsync(
+                    teacher.Id);
+
+            if (!deleted)
+            {
+                Snackbar.Add(
+                    "Unable to delete teacher.",
+                    Severity.Error);
+
+                return;
+            }
+
+            Snackbar.Add(
+                "Teacher deleted successfully.",
+                Severity.Success);
+
+            await LoadTeachers();
+        }
+        catch (Exception)
+        {
+            Snackbar.Add(
+                "An error occurred while deleting the teacher.",
+                Severity.Error);
+        }
+    }
+
+
+    private static string GetInitials(
+        TeacherDto teacher)
+    {
+        var first =
+            string.IsNullOrWhiteSpace(teacher.FirstName)
+                ? ""
+                : teacher.FirstName[..1];
+
+        var last =
+            string.IsNullOrWhiteSpace(teacher.LastName)
+                ? ""
+                : teacher.LastName[..1];
+
+        return $"{first}{last}".ToUpper();
+    }
+}

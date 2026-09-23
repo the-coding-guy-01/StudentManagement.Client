@@ -1,0 +1,70 @@
+﻿.teacher-form-page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 8px;
+}
+
+.form-header {
+    margin-bottom: 24px;
+}
+
+.back-button {
+    margin-bottom: 12px;
+}
+
+.form-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.teacher-form-card {
+    padding: 28px;
+    border-radius: 16px;
+    border: 1px solid rgba(100, 100, 150, 0.15);
+}
+
+.form-section {
+    width: 100%;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.section-description {
+    margin-bottom: 24px;
+}
+
+.form-divider {
+    margin: 30px 0;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+@media (max-width: 600px) {
+
+    .teacher-form-page {
+        padding: 0;
+    }
+
+    .teacher-form-card {
+        padding: 18px;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+        .form-actions ::deep .mud-button-root {
+            width: 100%;
+        }
+}
