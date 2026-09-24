@@ -18,5 +18,12 @@ namespace StudentManagement.Client.Services.Interfaces
             UpdateStudentDto dto);
 
         Task<bool> DeleteAsync(int id);
+
+        Task<StudentDto?> AssignCourseAsync(
+    int studentId,
+    int courseId);
+
+        Task<bool> RemoveCourseAsync(
+            int studentId);
     }
 }

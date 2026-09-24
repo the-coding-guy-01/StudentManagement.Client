@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Json;
-using StudentManagement.Client.Models.Students;
+﻿using StudentManagement.Client.Models.Students;
 using StudentManagement.Client.Services.Interfaces;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace StudentManagement.Client.Services
 {
@@ -99,6 +100,32 @@ namespace StudentManagement.Client.Services
             response.EnsureSuccessStatusCode();
 
             return true;
+        }
+
+        public async Task<StudentDto?> AssignCourseAsync(
+    int studentId,
+    int courseId)
+        {
+            var response = await _http.PutAsync(
+                $"api/students/{studentId}/course/{courseId}",
+                null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content
+                .ReadFromJsonAsync<StudentDto>();
+        }
+
+        public async Task<bool> RemoveCourseAsync(
+    int studentId)
+        {
+            var response = await _http.DeleteAsync(
+                $"api/students/{studentId}/course");
+
+            return response.IsSuccessStatusCode;
         }
     }
 }

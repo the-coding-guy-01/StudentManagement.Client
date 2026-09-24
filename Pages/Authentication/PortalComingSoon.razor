@@ -1,0 +1,58 @@
+﻿@page "/portal-coming-soon"
+
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
+
+<PageTitle>Portal</PageTitle>
+
+
+<MudContainer MaxWidth="MaxWidth.Medium"
+              Class="mt-16">
+
+    <MudPaper Class="pa-8 text-center"
+              Elevation="2">
+
+        <MudIcon
+            Icon="@Icons.Material.Filled.Construction"
+            Size="Size.Large"
+            Color="Color.Primary" />
+
+        <MudText Typo="Typo.h4"
+                 Class="mt-4">
+            Portal Coming Soon
+        </MudText>
+
+
+        <AuthorizeView>
+
+            <Authorized>
+
+                <MudText Typo="Typo.body1"
+                         Class="mt-3">
+
+                    Welcome,
+                    @context.User.Identity?.Name
+
+                </MudText>
+
+
+                <MudText Typo="Typo.body2"
+                         Color="Color.Secondary">
+
+                    Your
+                    @context.User.FindFirst(
+                        System.Security.Claims.ClaimTypes.Role)?.Value
+                    portal will be available soon.
+
+                </MudText>
+
+            </Authorized>
+
+        </AuthorizeView>
+
+    </MudPaper>
+
+</MudContainer>

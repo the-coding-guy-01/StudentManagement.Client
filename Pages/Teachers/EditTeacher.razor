@@ -4,7 +4,7 @@
 @using StudentManagement.Client.Models.Teachers
 @using StudentManagement.Client.Services.Interfaces
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
 @inject ITeacherService TeacherService
 @inject NavigationManager Navigation

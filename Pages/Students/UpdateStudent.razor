@@ -3,6 +3,9 @@
 @using StudentManagement.Client.Models.Students
 @using StudentManagement.Client.Services.Interfaces
 
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+
 @inject IStudentService StudentService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar

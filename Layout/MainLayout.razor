@@ -1,10 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using StudentManagement.Client.Services.Interfaces
 
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
 
+@inherits LayoutComponentBase
 
 <MudLayout>
 
@@ -43,63 +42,85 @@
                Breakpoint="Breakpoint.Md"
                Elevation="1">
 
-        <!-- Sidebar Header -->
-        <MudDrawerHeader>
+        <div class="d-flex flex-column h-100">
 
-            <MudStack Row="true"
-                      AlignItems="AlignItems.Center"
-                      Spacing="2">
+            <!-- Sidebar Header -->
+            <MudDrawerHeader>
 
-                <MudIcon Icon="@Icons.Material.Filled.School"
-                         Size="Size.Large"
-                         Color="Color.Primary" />
+                <MudStack Row="true"
+                          AlignItems="AlignItems.Center"
+                          Spacing="2">
 
-                <MudText Typo="Typo.h6">
-                    EduManager
-                </MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.School"
+                             Size="Size.Large"
+                             Color="Color.Primary" />
 
-            </MudStack>
+                    <MudText Typo="Typo.h6">
+                        EduManager
+                    </MudText>
 
-        </MudDrawerHeader>
+                </MudStack>
 
-
-        <!-- Navigation -->
-        <MudNavMenu>
-
-            <MudNavLink Href="/dashboard"
-                        Match="NavLinkMatch.All"
-                        Icon="@Icons.Material.Filled.Dashboard">
-
-                Dashboard
-
-            </MudNavLink>
+            </MudDrawerHeader>
 
 
-            <MudNavLink Href="/students"
-                        Match="NavLinkMatch.Prefix"
-                        Icon="@Icons.Material.Filled.People">
+            <!-- Navigation -->
+            <MudNavMenu Class="d-flex flex-column flex-grow-1">
 
-                Students
+                <!-- ADMIN MENU -->
+                <AuthorizeView Roles="Admin">
 
-            </MudNavLink>
+                    <Authorized>
 
-            <MudNavLink Href="/teachers"
-                        Match="NavLinkMatch.Prefix"
-                        Icon="@Icons.Material.Filled.School">
+                        <div>
 
-                Teachers
+                            <MudNavLink Href="/dashboard"
+                                        Match="NavLinkMatch.All"
+                                        Icon="@Icons.Material.Filled.Dashboard">
+                                Dashboard
+                            </MudNavLink>
 
-            </MudNavLink>
+                            <MudNavLink Href="/students"
+                                        Match="NavLinkMatch.Prefix"
+                                        Icon="@Icons.Material.Filled.People">
+                                Students
+                            </MudNavLink>
 
-            <MudNavLink Href="/courses"
-                        Match="NavLinkMatch.Prefix"
-                        Icon="@Icons.Material.Filled.MenuBook">
+                            <MudNavLink Href="/teachers"
+                                        Match="NavLinkMatch.Prefix"
+                                        Icon="@Icons.Material.Filled.School">
+                                Teachers
+                            </MudNavLink>
 
-                Courses
+                            <MudNavLink Href="/courses"
+                                        Match="NavLinkMatch.Prefix"
+                                        Icon="@Icons.Material.Filled.MenuBook">
+                                Courses
+                            </MudNavLink>
 
-            </MudNavLink>
+                        </div>
 
-        </MudNavMenu>
+                    </Authorized>
+
+                </AuthorizeView>
+
+
+                <!-- LOGOUT - ALWAYS AT BOTTOM -->
+                <div class="mt-auto pb-3">
+
+                    <MudNavLink OnClick="Logout"
+                                Icon="@Icons.Material.Filled.Logout"
+                                Style="color: var(--mud-palette-error);">
+
+                        Logout
+
+                    </MudNavLink>
+
+                </div>
+
+            </MudNavMenu>
+
+        </div>
 
     </MudDrawer>
 
@@ -127,5 +148,14 @@
     private void ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+
+        Navigation.NavigateTo(
+            "/login",
+            true);
     }
 }

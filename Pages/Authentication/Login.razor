@@ -1,0 +1,202 @@
+﻿@page "/"
+@page "/login"
+@layout AuthLayout
+
+@using StudentManagement.Client.Models.Auth
+@using StudentManagement.Client.Services.Interfaces
+
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+
+<PageTitle>Login</PageTitle>
+
+
+<MudContainer MaxWidth="MaxWidth.Small"
+              Class="mt-16">
+
+    <MudPaper Elevation="4"
+              Class="pa-8">
+
+        <MudStack Spacing="4">
+
+            <div class="text-center">
+
+                <MudIcon Icon="@Icons.Material.Filled.School"
+                         Color="Color.Primary"
+                         Size="Size.Large" />
+
+                <MudText Typo="Typo.h4"
+                         Class="mt-3">
+                    Student Manager
+                </MudText>
+
+                <MudText Typo="Typo.body2"
+                         Color="Color.Secondary">
+                    Sign in to your account
+                </MudText>
+
+            </div>
+
+
+            @if (!string.IsNullOrWhiteSpace(
+                        errorMessage))
+            {
+                <MudAlert Severity="Severity.Error">
+                    @errorMessage
+                </MudAlert>
+            }
+
+
+            <MudForm @ref="form">
+
+                <MudTextField T="string"
+                              Label="Username"
+                              Variant="Variant.Outlined"
+                              @bind-Value="login.Username"
+                              Required="true"
+                              RequiredError="Username is required"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Person"
+                              Class="mb-4" />
+
+
+                <MudTextField T="string"
+                              Label="Password"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              @bind-Value="login.Password"
+                              Required="true"
+                              RequiredError="Password is required"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Lock" />
+
+            </MudForm>
+
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="@isLoading"
+                       OnClick="HandleLoginAsync">
+
+                @if (isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small"
+                                         Indeterminate="true"
+                                         Class="mr-2" />
+                }
+
+                Sign In
+
+            </MudButton>
+
+        </MudStack>
+
+    </MudPaper>
+
+</MudContainer>
+
+
+@code {
+
+    private MudForm? form;
+
+    private LoginRequest login =
+        new();
+
+    private string errorMessage =
+        string.Empty;
+
+    private bool isLoading;
+
+
+    private async Task HandleLoginAsync()
+    {
+        errorMessage =
+            string.Empty;
+
+
+        if (form != null)
+        {
+            await form.Validate();
+
+
+            if (!form.IsValid)
+            {
+                return;
+            }
+        }
+
+
+        try
+        {
+            isLoading = true;
+
+
+            var result =
+                await AuthService.LoginAsync(
+                    login);
+
+
+            if (result == null)
+            {
+                errorMessage =
+                    "Invalid username or password.";
+
+                return;
+            }
+
+
+            switch (result.Role)
+            {
+                case "Admin":
+
+                    Navigation.NavigateTo(
+                        "/dashboard",
+                        true);
+
+                    break;
+
+
+                case "Student":
+
+                    Navigation.NavigateTo(
+                        "/portal-coming-soon",
+                        true);
+
+                    break;
+
+
+                case "Teacher":
+
+                    Navigation.NavigateTo(
+                        "/portal-coming-soon",
+                        true);
+
+                    break;
+
+
+                default:
+
+                    await AuthService
+                        .LogoutAsync();
+
+                    errorMessage =
+                        "Invalid user role.";
+
+                    break;
+            }
+        }
+        catch
+        {
+            errorMessage =
+                "Unable to connect to the server.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

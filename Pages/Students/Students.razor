@@ -2,6 +2,9 @@
 
 @using StudentManagement.Client.Models.Students
 
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+
 @inject StudentManagement.Client.Services.Interfaces.IStudentService StudentService
 @inject NavigationManager Navigation
 

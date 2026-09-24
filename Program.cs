@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using StudentManagement.Client;
@@ -19,6 +20,7 @@ builder.RootComponents.Add<HeadOutlet>(
 
 builder.Services.AddMudServices();
 
+builder.Services.AddAuthorizationCore();
 
 // API URL
 
@@ -52,5 +54,20 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+builder.Services.AddScoped<
+    CustomAuthStateProvider>();
+
+
+builder.Services.AddScoped<
+    AuthenticationStateProvider>(
+        provider =>
+            provider.GetRequiredService<
+                CustomAuthStateProvider>());
+
+
+builder.Services.AddScoped<
+    IAuthService,
+    AuthService>();
 
 await builder.Build().RunAsync();

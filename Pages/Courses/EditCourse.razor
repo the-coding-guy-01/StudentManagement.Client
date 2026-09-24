@@ -4,6 +4,9 @@
 @using StudentManagement.Client.Models.Teachers
 @using StudentManagement.Client.Services.Interfaces
 
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+
 @inject ICourseService CourseService
 @inject ITeacherService TeacherService
 @inject NavigationManager Navigation

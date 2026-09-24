@@ -1,8 +1,10 @@
-﻿@page "/"
-@page "/dashboard"
+﻿@page "/dashboard"
 
 @using StudentManagement.Client.Models.Dashboard
 @using StudentManagement.Client.Services.Interfaces
+
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 
 @inject IDashboardService DashboardService
 @inject NavigationManager Navigation
@@ -1092,7 +1094,7 @@ else if (dashboard is not null)
                                                text-start
                                                w-100 h-100
                                                p-3"
-                                        @onclick="@(() => Navigation.NavigateTo("/student-course-enrollment"))">
+                                        @onclick="@(() => Navigation.NavigateTo("/student-course-assignment"))">
 
                                     <div class="d-flex align-items-center gap-3">
 
