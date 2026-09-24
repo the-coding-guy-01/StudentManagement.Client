@@ -1,0 +1,249 @@
+@page "/students/details/{Id:int}"
+
+@using StudentManagement.Client.Models.Students
+@using StudentManagement.Client.Services.Interfaces
+
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IStudentService StudentService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Student Details</PageTitle>
+
+<div class="student-admin-page">
+    <div class="student-page-heading">
+        <MudText Typo="Typo.h3" Class="student-page-title">Student Details</MudText>
+        <MudText Typo="Typo.body1" Class="student-page-subtitle">View detailed information about the selected student.</MudText>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="student-form-card student-form-loading">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            <MudText Class="mt-2">Loading student details...</MudText>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+    }
+    else if (student is not null)
+    {
+        <div class="student-details-hero">
+            <div class="student-hero-main">
+                <div class="student-large-avatar">@GetInitials(student)</div>
+                <div>
+                    <MudText Typo="Typo.h3" Class="student-hero-title">@student.FullName</MudText>
+                    <div class="student-hero-meta">
+                        <MudIcon Icon="@Icons.Material.Filled.School" />
+                        <MudText Typo="Typo.h6">Admission No. @student.AdmissionNumber</MudText>
+                    </div>
+                    <span class="student-status-badge @(student.IsActive ? string.Empty : "inactive")">
+                        @(student.IsActive ? "Active" : "Inactive")
+                    </span>
+                </div>
+            </div>
+
+            <div class="student-hero-actions">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="ReturnToStudents"
+                           Class="student-secondary-button">
+                    Return to Students
+                </MudButton>
+                <div class="student-action-row">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               OnClick="EditStudent"
+                               Class="student-secondary-button">
+                        Edit Student
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               StartIcon="@Icons.Material.Filled.DeleteOutline"
+                               OnClick="OpenDeleteDialog"
+                               Class="student-secondary-button">
+                        Delete Student
+                    </MudButton>
+                </div>
+            </div>
+        </div>
+
+        <div class="student-detail-grid">
+            <div class="student-detail-card">
+                <MudText Typo="Typo.h5" Class="student-detail-card-title">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" />
+                    Personal Information
+                </MudText>
+                @DetailRow(Icons.Material.Filled.Person, "First Name", student.FirstName)
+                @DetailRow(Icons.Material.Filled.Person, "Last Name", student.LastName)
+                @DetailRow(Icons.Material.Filled.Person, "Full Name", student.FullName)
+                @DetailRow(Icons.Material.Filled.Email, "Email", student.Email)
+                @DetailRow(Icons.Material.Filled.Phone, "Phone Number", string.IsNullOrWhiteSpace(student.Phone) ? "Not provided" : student.Phone)
+                @DetailRow(Icons.Material.Filled.CalendarMonth, "Date of Birth", student.DateOfBirth?.ToString("MMMM dd, yyyy") ?? "Not provided")
+                @DetailRow(Icons.Material.Filled.Wc, "Gender", string.IsNullOrWhiteSpace(student.Gender) ? "Not provided" : student.Gender)
+            </div>
+
+            <div class="student-detail-card">
+                <MudText Typo="Typo.h5" Class="student-detail-card-title">
+                    <MudIcon Icon="@Icons.Material.Filled.School" />
+                    Academic Information
+                </MudText>
+                @DetailRow(Icons.Material.Filled.AccountBalance, "Admission Number", student.AdmissionNumber)
+                @DetailRow(Icons.Material.Filled.CalendarMonth, "Enrollment Date", student.EnrollmentDate.ToString("MMMM dd, yyyy"))
+                @DetailRow(Icons.Material.Filled.MenuBook, "Assigned Course", student.CourseName ?? "Unassigned")
+            </div>
+        </div>
+    }
+</div>
+
+@if (showDeleteDialog && student is not null)
+{
+    <div class="student-modal-backdrop">
+        <div class="student-delete-modal">
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           OnClick="CloseDeleteDialog"
+                           Class="student-modal-close" />
+            <div class="student-delete-icon">
+                <MudIcon Icon="@Icons.Material.Filled.DeleteOutline" />
+            </div>
+            <MudText Typo="Typo.h4" Class="student-modal-title">Delete Student?</MudText>
+            <div class="student-delete-summary">
+                <div class="student-avatar">@GetInitials(student)</div>
+                <div>
+                    <MudText Typo="Typo.h6">@student.FullName</MudText>
+                    <MudText Typo="Typo.body2">Admission Number: @student.AdmissionNumber</MudText>
+                </div>
+            </div>
+            <div class="student-warning-row">
+                <MudIcon Icon="@Icons.Material.Filled.WarningAmber" />
+                <MudText>
+                    Are you sure you want to delete this student? Deleting may affect related course enrollment information.
+                </MudText>
+            </div>
+            <div class="student-modal-actions">
+                <MudButton Variant="Variant.Outlined" Disabled="@isDeleting" OnClick="CloseDeleteDialog">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.DeleteOutline"
+                           Disabled="@isDeleting"
+                           OnClick="DeleteStudent">
+                    Delete Student
+                </MudButton>
+            </div>
+        </div>
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public int Id { get; set; }
+
+    private StudentDto? student;
+    private bool isLoading = true;
+    private bool isDeleting;
+    private bool showDeleteDialog;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudent();
+    }
+
+    private async Task LoadStudent()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            student = await StudentService.GetByIdAsync(Id);
+
+            if (student is null)
+            {
+                errorMessage = "Student not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            errorMessage = "Student details could not be loaded.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private RenderFragment DetailRow(string icon, string label, string value) => @<div class="student-detail-row">
+        <MudIcon Icon="@icon" />
+        <span class="student-detail-label">@label</span>
+        <span class="student-detail-value">@value</span>
+    </div>;
+
+    private static string GetInitials(StudentDto selectedStudent)
+    {
+        var first = string.IsNullOrWhiteSpace(selectedStudent.FirstName) ? string.Empty : selectedStudent.FirstName[..1];
+        var last = string.IsNullOrWhiteSpace(selectedStudent.LastName) ? string.Empty : selectedStudent.LastName[..1];
+        return $"{first}{last}".ToUpperInvariant();
+    }
+
+    private void ReturnToStudents()
+    {
+        Navigation.NavigateTo("/students");
+    }
+
+    private void EditStudent()
+    {
+        Navigation.NavigateTo($"/students/update/{Id}");
+    }
+
+    private void OpenDeleteDialog()
+    {
+        showDeleteDialog = true;
+    }
+
+    private void CloseDeleteDialog()
+    {
+        if (!isDeleting)
+        {
+            showDeleteDialog = false;
+        }
+    }
+
+    private async Task DeleteStudent()
+    {
+        if (student is null || isDeleting)
+        {
+            return;
+        }
+
+        try
+        {
+            isDeleting = true;
+            var deleted = await StudentService.DeleteAsync(student.Id);
+
+            if (!deleted)
+            {
+                Snackbar.Add("Student could not be deleted.", Severity.Error);
+                return;
+            }
+
+            Snackbar.Add("Student deleted successfully.", Severity.Success);
+            Navigation.NavigateTo("/students");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            Snackbar.Add("An error occurred while deleting the student.", Severity.Error);
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+}
