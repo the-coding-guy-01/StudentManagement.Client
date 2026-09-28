@@ -1,6 +1,6 @@
 ﻿.teacher-filter-panel {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(211, 225, 248, 0.9);
+    border: 1px solid red;
     border-radius: 8px;
     box-shadow: 0 14px 38px rgba(43, 91, 158, 0.1);
+    background: linear-gradient(135deg, rgba(236, 246, 255, 0.96), rgba(210, 230, 255, 0.92));
 }
