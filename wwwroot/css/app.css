@@ -132,7 +132,7 @@ code {
     color: #8e58ff;
     font-size: 6em !important;
 }
-}
+
 
 .student-form-card,
 .student-details-hero,
@@ -227,17 +227,17 @@ code {
     width: 118px;
 }
 
-.student-search-input .mud-input-outlined-border {
+.student-search-input .mud-input-outlined-border, .teachers-search-input .mud-input-outlined-border {
     border-radius: 30px !important;
     border-color: #f8fcfe !important;
 }
 
-.student-search-input .mud-input-outlined {
+.student-search-input .mud-input-outlined, .teachers-search-input .mud-input-outlined {
     background-color: #f8fcfe !important;
     border-radius: 30px !important;
 }
 
-.student-search-input input::placeholder {
+.student-search-input input::placeholder, .teachers-search-input input::placeholder {
     color: #7282ac !important;
     opacity: 1;
 }

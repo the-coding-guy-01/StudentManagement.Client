@@ -70,4 +70,8 @@ builder.Services.AddScoped<
     IAuthService,
     AuthService>();
 
+builder.Services.AddScoped<
+    IStudentProfileService,
+    StudentProfileService>();
+
 await builder.Build().RunAsync();

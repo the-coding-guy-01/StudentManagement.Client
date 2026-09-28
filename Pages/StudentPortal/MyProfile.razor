@@ -1,0 +1,954 @@
+﻿@page "/student/profile"
+
+@layout StudentLayout
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using StudentManagement.Client.Models.StudentPortal
+@using StudentManagement.Client.Services.Interfaces
+
+@attribute [Authorize(Roles = "Student")]
+
+@inject IStudentProfileService StudentProfileService
+@inject ISnackbar Snackbar
+
+
+<PageTitle>My Profile</PageTitle>
+
+
+@if (isLoading)
+{
+    <div class="d-flex justify-center align-center"
+         style="min-height:400px;">
+
+        <MudProgressCircular Indeterminate="true"
+                             Size="Size.Large"
+                             Color="Color.Primary" />
+
+    </div>
+}
+else if (profile == null)
+{
+    <MudAlert Severity="Severity.Error">
+        Unable to load your student profile.
+    </MudAlert>
+}
+else
+{
+    <div class="student-profile-page">
+
+        <!-- PAGE TITLE -->
+
+        <MudText Typo="Typo.h4"
+                 Class="font-weight-bold">
+
+            My Profile
+
+        </MudText>
+
+        <MudText Typo="Typo.body1"
+                 Color="Color.Secondary"
+                 Class="mb-5">
+
+            Manage your personal and academic information
+
+        </MudText>
+
+
+        <!-- PROFILE HEADER -->
+
+        <MudPaper Elevation="0"
+                  Class="profile-header pa-6 mb-5">
+
+            <div class="d-flex align-center flex-wrap">
+
+                @if (!string.IsNullOrWhiteSpace(
+                            profile.ProfileImageUrl))
+                {
+                    <MudAvatar Image="@profile.ProfileImageUrl"
+                               Size="Size.Large"
+                               Class="profile-avatar" />
+                }
+                else
+                {
+                    <MudAvatar Size="Size.Large"
+                               Color="Color.Primary"
+                               Class="profile-avatar">
+
+                        @GetInitials()
+
+                    </MudAvatar>
+                }
+
+
+                <div class="ml-5">
+
+                    <MudText Typo="Typo.h4"
+                             Class="font-weight-bold">
+
+                        @profile.FullName
+
+                    </MudText>
+
+
+                    <MudText Typo="Typo.body1"
+                             Color="Color.Secondary">
+
+                        Admission No.
+                        @profile.AdmissionNumber
+
+                    </MudText>
+
+
+                    <MudChip T="string"
+                             Size="Size.Small"
+                             Color="@(profile.IsActive
+                                                              ? Color.Success
+                                                              : Color.Error)"
+                                                                            Class="mt-2">
+
+                        @(profile.IsActive
+                                            ? "Active Student"
+                                            : "Inactive Student")
+
+                </MudChip>
+
+                </div>
+
+
+                <MudSpacer />
+
+
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           OnClick="StartEditing">
+
+                    Edit Profile
+
+                </MudButton>
+
+            </div>
+
+        </MudPaper>
+
+
+        <MudGrid Spacing="3">
+
+            <!-- PERSONAL INFORMATION -->
+
+            <MudItem xs="12" lg="7">
+
+                <MudPaper Elevation="0"
+                          Class="p-4 p-md-5 bg-white border rounded-4 shadow-sm">
+
+                    <!-- Header -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4 pb-3 border-bottom">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-3"
+                                 style="width:46px; height:46px;">
+
+                                <MudIcon Icon="@Icons.Material.Filled.Badge"
+                                         Color="Color.Primary"
+                                         Size="Size.Medium" />
+
+                            </div>
+
+                            <div>
+
+                                <MudText Typo="Typo.h6"
+                                         Class="fw-bold mb-1">
+
+                                    Personal Information
+
+                                </MudText>
+
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary">
+
+                                    View and manage your personal details
+
+                                </MudText>
+
+                            </div>
+
+                        </div>
+
+
+                    @if (!isEditing)
+                        {
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       OnClick="StartEditing"
+                                       Class="rounded-pill px-4">
+
+                                Edit Information
+
+                            </MudButton>
+                        }
+
+                    </div>
+
+
+                    <!-- INFORMATION FORM -->
+
+                    <div class="row g-4">
+
+                        <!-- FIRST NAME -->
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="p-3 bg-light rounded-4 h-100">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.Person"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Small" />
+
+                                        <span class="fw-semibold text-secondary small">
+                                            First Name
+                                        </span>
+
+                                    </div>
+
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">
+                                        Read only
+                                    </span>
+
+                                </div>
+
+                                <MudTextField T="string"
+                                              Value="@profile.FirstName"
+                                              ReadOnly="true"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="bg-white rounded-3" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- LAST NAME -->
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="p-3 bg-light rounded-4 h-100">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.Person"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Small" />
+
+                                        <span class="fw-semibold text-secondary small">
+                                            Last Name
+                                        </span>
+
+                                    </div>
+
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">
+                                        Read only
+                                    </span>
+
+                                </div>
+
+                                <MudTextField T="string"
+                                              Value="@profile.LastName"
+                                              ReadOnly="true"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="bg-white rounded-3" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+
+                        <div class="col-12">
+
+                            <div class="p-3 bg-light rounded-4">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.Email"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Small" />
+
+                                        <span class="fw-semibold text-secondary small">
+                                            Email Address
+                                        </span>
+
+                                    </div>
+
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">
+                                        Read only
+                                    </span>
+
+                                </div>
+
+                                <MudTextField T="string"
+                                              Value="@profile.Email"
+                                              ReadOnly="true"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="bg-white rounded-3" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PHONE -->
+
+                        <div class="col-12">
+
+                            <div class="p-3 border border-primary border-opacity-25 bg-primary bg-opacity-10 rounded-4">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.Phone"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Small" />
+
+                                        <span class="fw-semibold text-secondary small">
+                                            Phone Number
+                                        </span>
+
+                                    </div>
+
+                                    @if (isEditing)
+                                    {
+                                        <span class="badge bg-primary rounded-pill px-3 py-2">
+                                            Editable
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                                            Can edit
+                                        </span>
+                                    }
+
+                                </div>
+
+                                <MudTextField T="string"
+                                              @bind-Value="editPhone"
+                                              ReadOnly="@(!isEditing)"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Placeholder="Enter phone number"
+                                              Adornment="Adornment.End"
+                                              AdornmentIcon="@(isEditing
+                                                                                    ? Icons.Material.Filled.Edit
+                                                                                : Icons.Material.Filled.Lock)"
+                                          Class="bg-white rounded-3" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DATE OF BIRTH -->
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="p-3 bg-light rounded-4 h-100">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Small" />
+
+                                        <span class="fw-semibold text-secondary small">
+                                            Date of Birth
+                                        </span>
+
+                                    </div>
+
+                                    <MudIcon Icon="@Icons.Material.Filled.Lock"
+                                             Color="Color.Secondary"
+                                             Size="Size.Small" />
+
+                                </div>
+
+                                <MudTextField T="string"
+                                              Value="@FormatDate(profile.DateOfBirth)"
+                                              ReadOnly="true"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="bg-white rounded-3" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- GENDER -->
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="p-3 bg-light rounded-4 h-100">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <MudIcon Icon="@Icons.Material.Filled.Wc"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Small" />
+
+                                        <span class="fw-semibold text-secondary small">
+                                            Gender
+                                        </span>
+
+                                    </div>
+
+                                    <MudIcon Icon="@Icons.Material.Filled.Lock"
+                                             Color="Color.Secondary"
+                                             Size="Size.Small" />
+
+                                </div>
+
+                                <MudTextField T="string"
+                                              Value="@profile.Gender"
+                                              ReadOnly="true"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="bg-white rounded-3" />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EDIT ACTIONS -->
+                @if (isEditing)
+                    {
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4 pt-4 border-top">
+
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Secondary"
+                                       StartIcon="@Icons.Material.Filled.Close"
+                                       OnClick="CancelEditing"
+                                       Class="rounded-pill px-4">
+
+                                Cancel
+
+                            </MudButton>
+
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       OnClick="SaveProfile"
+                                       Disabled="@isSaving"
+                                       Class="rounded-pill px-4">
+
+                                @if (isSaving)
+                                {
+                                    <MudProgressCircular Indeterminate="true"
+                                                         Size="Size.Small"
+                                                         Class="me-2" />
+                                }
+
+                                Save Changes
+
+                            </MudButton>
+
+                        </div>
+                    }
+
+                </MudPaper>
+
+            </MudItem>
+
+
+            <MudItem xs="12" lg="5">
+
+                <!-- ACADEMIC INFORMATION -->
+
+                <MudPaper Elevation="1"
+                          Class="pa-5 profile-card mb-4">
+
+                    <MudStack Row="true"
+                              AlignItems="AlignItems.Center"
+                              Class="mb-4">
+
+                        <MudIcon Icon="@Icons.Material.Filled.School"
+                                 Color="Color.Primary" />
+
+                        <MudText Typo="Typo.h6"
+                                 Class="font-weight-bold">
+
+                            Academic Information
+
+                        </MudText>
+
+                    </MudStack>
+
+
+                    <div class="academic-row">
+
+                        <span>Admission Number</span>
+
+                        <strong>
+                            @profile.AdmissionNumber
+                        </strong>
+
+                    </div>
+
+
+                    <MudDivider />
+
+
+                    <div class="academic-row">
+
+                        <span>Enrollment Date</span>
+
+                        <strong>
+                            @profile.EnrollmentDate
+                        </strong>
+
+                    </div>
+
+
+                    <MudDivider />
+
+
+                    <div class="academic-row">
+
+                        <span>Assigned Course</span>
+
+                        <strong>
+                            @GetCourseDisplay()
+                        </strong>
+
+                    </div>
+
+
+                    <MudDivider />
+
+
+                    <div class="academic-row">
+
+                        <span>Student Status</span>
+
+                        <MudChip T="string"
+                                 Size="Size.Small"
+                                 Color="@(profile.IsActive
+                                                                      ? Color.Success
+                                                                      : Color.Error)">
+
+                            @(profile.IsActive
+                                                    ? "Active"
+                                                    : "Inactive")
+
+                    </MudChip>
+
+                    </div>
+
+
+                    <MudAlert Severity="Severity.Info"
+                              Variant="Variant.Text"
+                              Class="mt-4">
+
+                        Academic information is managed
+                        by the institution.
+
+                    </MudAlert>
+
+                </MudPaper>
+
+
+                <!-- PROFILE PICTURE -->
+
+                <MudPaper Elevation="1"
+                          Class="pa-5 profile-card">
+
+                    <MudText Typo="Typo.h6"
+                             Class="font-weight-bold mb-4">
+
+                        Profile Picture
+
+                    </MudText>
+
+
+                    <div class="d-flex align-center flex-wrap">
+
+                    @if (!string.IsNullOrWhiteSpace(
+                                        profile.ProfileImageUrl))
+                        {
+                            <MudAvatar Image="@profile.ProfileImageUrl"
+                                       Size="Size.Large"
+                                       Class="profile-photo-small" />
+                        }
+                        else
+                        {
+                            <MudAvatar Size="Size.Large"
+                                       Color="Color.Primary"
+                                       Class="profile-photo-small">
+
+                                @GetInitials()
+
+                            </MudAvatar>
+                        }
+
+
+                        <div class="ml-4">
+
+                            <InputFile OnChange="UploadPhoto"
+                                       accept=".jpg,.jpeg,.png,.webp" />
+
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                                    profile.ProfileImageUrl))
+                            {
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Error"
+                                           StartIcon="@Icons.Material.Filled.Delete"
+                                           OnClick="RemovePhoto"
+                                           Class="mt-2">
+
+                                    Remove Photo
+
+                                </MudButton>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </MudPaper>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </div>
+}
+
+
+<style>
+
+    .student-profile-page {
+        max-width: 1500px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        border-radius: 18px;
+        background: linear-gradient( 120deg, rgba(127, 202, 255, 0.35), rgba(170, 139, 255, 0.35));
+    }
+
+    .profile-card {
+        border-radius: 16px;
+    }
+
+    .profile-avatar {
+        width: 110px !important;
+        height: 110px !important;
+        font-size: 32px;
+    }
+
+    .profile-photo-small {
+        width: 90px !important;
+        height: 90px !important;
+        font-size: 25px;
+    }
+
+    .academic-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 18px 4px;
+    }
+
+</style>
+
+
+@code {
+
+    private StudentProfile? profile;
+
+    private bool isLoading = true;
+
+    private bool isEditing;
+
+    private bool isSaving;
+
+    private string editPhone =
+        string.Empty;
+
+
+    protected override async Task
+        OnInitializedAsync()
+    {
+        await LoadProfile();
+    }
+
+
+    private async Task LoadProfile()
+    {
+        try
+        {
+            isLoading = true;
+
+            profile =
+                await StudentProfileService
+                    .GetProfileAsync();
+
+
+            if (profile != null)
+            {
+                editPhone =
+                    profile.Phone;
+            }
+        }
+        catch
+        {
+            Snackbar.Add(
+                "Unable to load profile.",
+                Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private void StartEditing()
+    {
+        if (profile == null)
+        {
+            return;
+        }
+
+        editPhone =
+            profile.Phone;
+
+        isEditing = true;
+    }
+
+
+    private void CancelEditing()
+    {
+        if (profile == null)
+        {
+            return;
+        }
+
+        editPhone =
+            profile.Phone;
+
+        isEditing = false;
+    }
+
+
+    private async Task SaveProfile()
+    {
+        if (profile == null)
+        {
+            return;
+        }
+
+        try
+        {
+            isSaving = true;
+
+
+            var request =
+                new UpdateStudentProfileRequest
+                {
+                    Phone = editPhone
+                };
+
+
+            var updated =
+                await StudentProfileService
+                    .UpdateProfileAsync(
+                        request);
+
+
+            if (updated == null)
+            {
+                Snackbar.Add(
+                    "Unable to update profile.",
+                    Severity.Error);
+
+                return;
+            }
+
+
+            profile = updated;
+
+            editPhone =
+                profile.Phone;
+
+            isEditing = false;
+
+
+            Snackbar.Add(
+                "Profile updated successfully.",
+                Severity.Success);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+
+    private async Task UploadPhoto(
+        InputFileChangeEventArgs e)
+    {
+        var file =
+            e.File;
+
+
+        if (file.Size >
+            5 * 1024 * 1024)
+        {
+            Snackbar.Add(
+                "Image cannot exceed 5 MB.",
+                Severity.Warning);
+
+            return;
+        }
+
+
+        var updated =
+            await StudentProfileService
+                .UploadProfileImageAsync(
+                    file);
+
+
+        if (updated == null)
+        {
+            Snackbar.Add(
+                "Unable to upload profile picture.",
+                Severity.Error);
+
+            return;
+        }
+
+
+        profile = updated;
+
+
+        Snackbar.Add(
+            "Profile picture updated.",
+            Severity.Success);
+    }
+
+
+    private async Task RemovePhoto()
+    {
+        var success =
+            await StudentProfileService
+                .RemoveProfileImageAsync();
+
+
+        if (!success)
+        {
+            Snackbar.Add(
+                "Unable to remove profile picture.",
+                Severity.Error);
+
+            return;
+        }
+
+
+        if (profile != null)
+        {
+            profile.ProfileImageUrl = null;
+        }
+
+
+        Snackbar.Add(
+            "Profile picture removed.",
+            Severity.Success);
+    }
+
+
+    private string FormatDate(
+        DateTime? date)
+    {
+        return date?.ToString(
+            "MMMM dd, yyyy")
+            ?? "Not specified";
+    }
+
+
+    private string GetInitials()
+    {
+        if (profile == null)
+        {
+            return "?";
+        }
+
+
+        var first =
+            string.IsNullOrWhiteSpace(
+                profile.FirstName)
+                ? ""
+                : profile.FirstName[0]
+                    .ToString();
+
+
+        var last =
+            string.IsNullOrWhiteSpace(
+                profile.LastName)
+                ? ""
+                : profile.LastName[0]
+                    .ToString();
+
+
+        return $"{first}{last}"
+            .ToUpperInvariant();
+    }
+
+
+    private string GetCourseDisplay()
+    {
+        if (profile == null ||
+            string.IsNullOrWhiteSpace(
+                profile.CourseName))
+        {
+            return "Not assigned";
+        }
+
+
+        if (string.IsNullOrWhiteSpace(
+                profile.CourseCode))
+        {
+            return profile.CourseName;
+        }
+
+
+        return
+            $"{profile.CourseCode} - " +
+            $"{profile.CourseName}";
+    }
+}
