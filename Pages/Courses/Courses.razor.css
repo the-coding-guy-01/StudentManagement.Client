@@ -75,8 +75,16 @@
     padding: 50px;
 }
 
-@media (max-width: 960px) {
+.course-filter-panel {
+    border: 1px solid rgba(211, 225, 248, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 14px 38px rgba(43, 91, 158, 0.1);
+    background: linear-gradient(135deg, rgba(236, 246, 255, 0.96), rgba(210, 230, 255, 0.92));
+    padding: 20px;
+    height: 100%;
+}
 
+@media (max-width: 960px) {
     .course-toolbar {
         flex-wrap: wrap;
     }

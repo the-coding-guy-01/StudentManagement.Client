@@ -68,7 +68,7 @@
 
             <div class="d-flex flex-column flex-md-row
                         align-items-stretch align-items-md-center
-                        justify-content-end gap-3 w-100">
+                        justify-content-end gap-3 w-100 course-filter-panel">
 
                 <!-- Search -->
                 <div class="flex-grow-1">
@@ -82,7 +82,8 @@
                                   Clearable="true"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  Style="width:100%;" />
+                                  Style="width:100%;"
+                                  Class="course-search-input"/>
 
                 </div>
 
@@ -93,10 +94,10 @@
 
                     <MudSelect T="string"
                                @bind-Value="statusFilter"
-                               Label="Status"
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
-                               Style="width:100%;">
+                               Style="width:100%;"
+                               Class="course-filter-input">
 
                         <MudSelectItem T="string"
                                        Value="@("All")">
