@@ -237,7 +237,7 @@ else
                                 </div>
 
                                 <MudTextField T="string"
-                                              Value="@profile.FirstName"
+                                              @bind-value="editFirstName"
                                               ReadOnly="@(!isEditing)"
                                               Variant="Variant.Outlined"
                                               Margin="Margin.Dense"
@@ -288,7 +288,7 @@ else
                                 </div>
 
                                 <MudTextField T="string"
-                                              Value="@profile.LastName"
+                                              @bind-value="editLastName"
                                               ReadOnly="@(!isEditing)"
                                               Variant="Variant.Outlined"
                                               Margin="Margin.Dense"
@@ -339,7 +339,7 @@ else
                                 </div>
 
                                 <MudTextField T="string"
-                                              Value="@profile.Email"
+                                              @bind-value="editEmail"
                                               ReadOnly="@(!isEditing)"
                                               Variant="Variant.Outlined"
                                               Margin="Margin.Dense"
@@ -739,6 +739,15 @@ else
     private string editPhone =
         string.Empty;
 
+    private string editFirstName =
+        string.Empty;
+
+    private string editLastName =
+        string.Empty;
+
+    private string editEmail =
+        string.Empty;
+
 
     protected override async Task
         OnInitializedAsync()
@@ -762,6 +771,12 @@ else
             {
                 editPhone =
                     profile.Phone;
+                editFirstName = 
+                    profile.FirstName;
+                editLastName = 
+                    profile.LastName;
+                editEmail =
+                    profile.Email;
             }
         }
         catch
@@ -786,6 +801,12 @@ else
 
         editPhone =
             profile.Phone;
+        editFirstName = 
+            profile.FirstName;
+        editLastName =
+            profile.LastName;   
+        editEmail =
+            profile.Email;
 
         isEditing = true;
     }
@@ -800,6 +821,12 @@ else
 
         editPhone =
             profile.Phone;
+        editFirstName = 
+            profile.FirstName;
+        editLastName =
+            profile.LastName;
+        editEmail =
+            profile.Email;
 
         isEditing = false;
     }
@@ -820,7 +847,10 @@ else
             var request =
                 new UpdateStudentProfileRequest
                 {
-                    Phone = editPhone
+                    Phone = editPhone,
+                    FirstName = editFirstName,
+                    LastName = editLastName,
+                    Email = editEmail
                 };
 
 
@@ -844,6 +874,12 @@ else
 
             editPhone =
                 profile.Phone;
+            editFirstName = 
+                profile.FirstName;
+            editLastName =
+                profile.LastName;
+            editEmail =
+                profile.Email;
 
             isEditing = false;
 
