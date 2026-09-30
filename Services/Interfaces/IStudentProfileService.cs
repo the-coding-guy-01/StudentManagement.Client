@@ -18,5 +18,8 @@ namespace StudentManagement.Client.Services.Interfaces
 
         Task<bool>
             RemoveProfileImageAsync();
+
+        string GetProfileImageUrl(
+        string? imagePath);
     }
 }

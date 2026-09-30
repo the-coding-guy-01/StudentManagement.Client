@@ -108,5 +108,18 @@ namespace StudentManagement.Client.Services
 
             return response.IsSuccessStatusCode;
         }
+
+        public string GetProfileImageUrl(string? imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath))
+            {
+                return string.Empty;
+            }
+
+            return new Uri(
+                _httpClient.BaseAddress!,
+                imagePath
+            ).ToString();
+        }
     }
 }

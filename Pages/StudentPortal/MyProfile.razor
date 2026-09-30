@@ -65,9 +65,12 @@ else
                 @if (!string.IsNullOrWhiteSpace(
                             profile.ProfileImageUrl))
                 {
-                    <MudAvatar Image="@profile.ProfileImageUrl"
-                               Size="Size.Large"
-                               Class="profile-avatar" />
+                    <MudAvatar Size="Size.Large"
+                                Class="profile-photo-small profile-avatar">
+                        <img src="@profile.ProfileImageUrl"
+                                alt="Profile Picture"
+                                class="profile-image" />
+                    </MudAvatar>
                 }
                 else
                 {
@@ -637,9 +640,12 @@ else
                     @if (!string.IsNullOrWhiteSpace(
                                         profile.ProfileImageUrl))
                         {
-                            <MudAvatar Image="@profile.ProfileImageUrl"
-                                       Size="Size.Large"
-                                       Class="profile-photo-small" />
+                            <MudAvatar Size="Size.Large"
+                                       Class="profile-photo-small">
+                                <img src="@profile.ProfileImageUrl"
+                                     alt="Profile Picture"
+                                     class="profile-image" />
+                            </MudAvatar>
                         }
                         else
                         {
@@ -686,45 +692,25 @@ else
     </div>
 }
 
-
 <style>
-
-    .student-profile-page {
-        max-width: 1500px;
-        margin: 0 auto;
+    .profile-photo-small {
+        width: 60px !important;
+        height: 60px !important;
     }
 
-    .profile-header {
-        border-radius: 18px;
-        background: linear-gradient( 120deg, rgba(127, 202, 255, 0.35), rgba(170, 139, 255, 0.35));
-    }
-
-    .profile-card {
-        border-radius: 16px;
+    .profile-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
     }
 
     .profile-avatar {
-        width: 110px !important;
-        height: 110px !important;
-        font-size: 32px;
-    }
-
-    .profile-photo-small {
-        width: 90px !important;
-        height: 90px !important;
-        font-size: 25px;
-    }
-
-    .academic-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        padding: 18px 4px;
+        width: 100px !important;
+        height: 100px !important;
     }
 
 </style>
-
 
 @code {
 
@@ -965,7 +951,6 @@ else
             "Profile picture removed.",
             Severity.Success);
     }
-
 
     private string FormatDate(
         DateTime? date)
