@@ -2,279 +2,369 @@
 
 @layout StudentLayout
 
+@using StudentManagement.Client.Models.StudentPortal
+@using StudentManagement.Client.Services.Interfaces
+
 @attribute [Authorize(Roles = "Student")]
+
+@inject IStudentProfileService StudentProfileService
+@inject ISnackbar Snackbar
 
 <PageTitle>Student Dashboard</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
 
-    <!-- Header -->
-    <MudText Typo="Typo.h4" GutterBottom="true">
-        Welcome back! 👋
-    </MudText>
+    @if (isLoading)
+    {
+        <MudStack AlignItems="AlignItems.Center" Class="mt-8">
 
-    <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
-        Here's what's happening with your studies.
-    </MudText>
+            <MudProgressCircular Indeterminate="true"
+                                 Color="Color.Primary" />
+
+            <MudText Class="mt-3">
+                Loading dashboard...
+            </MudText>
+
+        </MudStack>
+    }
+    else if (profile == null)
+    {
+        <MudAlert Severity="Severity.Error">
+            Unable to load your profile.
+        </MudAlert>
+    }
+    else
+    {
+        <!-- Header -->
+
+        <MudText Typo="Typo.h4" GutterBottom="true">
+            Welcome back, @profile.FirstName!
+        </MudText>
+
+        <MudText Typo="Typo.body1"
+                 Color="Color.Secondary"
+                 Class="mb-6">
+            Here's what's happening with your studies.
+        </MudText>
 
 
-    <!-- Summary Cards -->
-    <MudGrid Class="mb-6">
+        <!-- Summary Cards -->
 
-        <!-- Courses -->
-        <MudItem xs="12" sm="4">
-            <MudCard Elevation="1">
-                <MudCardContent>
+        <MudGrid Class="mb-6">
 
-                    <MudStack Row="true"
-                              AlignItems="AlignItems.Center"
-                              Spacing="3">
+            <!-- Courses -->
 
-                        <MudIcon Icon="@Icons.Material.Filled.MenuBook"
-                                 Color="Color.Primary"
-                                 Size="Size.Large" />
+            <MudItem xs="12" sm="4">
 
-                        <div>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                <MudCard Elevation="1">
+
+                    <MudCardContent>
+
+                        <MudStack Row="true"
+                                  AlignItems="AlignItems.Center"
+                                  Spacing="3">
+
+                            <MudIcon Icon="@Icons.Material.Filled.MenuBook"
+                                     Color="Color.Primary"
+                                     Size="Size.Large" />
+
+                            <div>
+
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary">
+                                    My Courses
+                                </MudText>
+
+                                <MudText Typo="Typo.h5">
+                                    @profile.Courses.Count
+                                </MudText>
+
+                            </div>
+
+                        </MudStack>
+
+                    </MudCardContent>
+
+                </MudCard>
+
+            </MudItem>
+
+
+            <!-- Attendance -->
+
+            <MudItem xs="12" sm="4">
+
+                <MudCard Elevation="1">
+
+                    <MudCardContent>
+
+                        <MudStack Row="true"
+                                  AlignItems="AlignItems.Center"
+                                  Spacing="3">
+
+                            <MudIcon Icon="@Icons.Material.Filled.BarChart"
+                                     Color="Color.Success"
+                                     Size="Size.Large" />
+
+                            <div>
+
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary">
+                                    Attendance
+                                </MudText>
+
+                                <MudText Typo="Typo.h5">
+                                    -
+                                </MudText>
+
+                            </div>
+
+                        </MudStack>
+
+                    </MudCardContent>
+
+                </MudCard>
+
+            </MudItem>
+
+
+            <!-- Assignments -->
+
+            <MudItem xs="12" sm="4">
+
+                <MudCard Elevation="1">
+
+                    <MudCardContent>
+
+                        <MudStack Row="true"
+                                  AlignItems="AlignItems.Center"
+                                  Spacing="3">
+
+                            <MudIcon Icon="@Icons.Material.Filled.Assignment"
+                                     Color="Color.Warning"
+                                     Size="Size.Large" />
+
+                            <div>
+
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary">
+                                    Assignments
+                                </MudText>
+
+                                <MudText Typo="Typo.h5">
+                                    -
+                                </MudText>
+
+                            </div>
+
+                        </MudStack>
+
+                    </MudCardContent>
+
+                </MudCard>
+
+            </MudItem>
+
+        </MudGrid>
+
+
+        <!-- Main Content -->
+
+        <MudGrid>
+
+            <!-- My Courses -->
+
+            <MudItem xs="12" md="8">
+
+                <MudCard Elevation="1">
+
+                    <MudCardHeader>
+
+                        <CardHeaderContent>
+
+                            <MudText Typo="Typo.h6">
                                 My Courses
                             </MudText>
 
-                            <MudText Typo="Typo.h5">
-                                4
+                        </CardHeaderContent>
+
+                        <CardHeaderActions>
+
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Primary"
+                                       Href="/student/my-courses">
+                                View All
+                            </MudButton>
+
+                        </CardHeaderActions>
+
+                    </MudCardHeader>
+
+
+                    <MudCardContent>
+
+                        @if (profile.Courses.Count == 0)
+                        {
+                            <MudText Color="Color.Secondary">
+                                You are not enrolled in any courses yet.
                             </MudText>
-                        </div>
+                        }
+                        else
+                        {
+                            <MudList T="StudentProfileCourse">
 
-                    </MudStack>
+                                @foreach (var course in profile.Courses)
+                                {
+                                    <MudListItem T="StudentProfileCourse">
 
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
+                                        <MudText Typo="Typo.body1">
+                                            @course.CourseName
+                                        </MudText>
 
+                                        <MudText Typo="Typo.body2"
+                                                 Color="Color.Secondary">
+                                            @course.CourseCode
+                                        </MudText>
 
-        <!-- Attendance -->
-        <MudItem xs="12" sm="4">
-            <MudCard Elevation="1">
-                <MudCardContent>
+                                        <MudChip T="string"
+                                                 Color="Color.Success"
+                                                 Size="Size.Small">
+                                            Active
+                                        </MudChip>
 
-                    <MudStack Row="true"
-                              AlignItems="AlignItems.Center"
-                              Spacing="3">
+                                    </MudListItem>
+                                }
 
-                        <MudIcon Icon="@Icons.Material.Filled.BarChart"
-                                 Color="Color.Success"
-                                 Size="Size.Large" />
+                            </MudList>
+                        }
 
-                        <div>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                Attendance
-                            </MudText>
+                    </MudCardContent>
 
-                            <MudText Typo="Typo.h5">
-                                85%
-                            </MudText>
-                        </div>
+                </MudCard>
 
-                    </MudStack>
-
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
+            </MudItem>
 
 
-        <!-- Assignments -->
-        <MudItem xs="12" sm="4">
-            <MudCard Elevation="1">
-                <MudCardContent>
+            <!-- Announcements -->
 
-                    <MudStack Row="true"
-                              AlignItems="AlignItems.Center"
-                              Spacing="3">
+            <MudItem xs="12" md="4">
 
-                        <MudIcon Icon="@Icons.Material.Filled.Assignment"
-                                 Color="Color.Warning"
-                                 Size="Size.Large" />
+                <MudCard Elevation="1">
 
-                        <div>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                Assignments
-                            </MudText>
+                    <MudCardHeader>
 
-                            <MudText Typo="Typo.h5">
-                                3
-                            </MudText>
-                        </div>
+                        <CardHeaderContent>
 
-                    </MudStack>
-
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-
-    </MudGrid>
-
-
-    <!-- Main Content -->
-    <MudGrid>
-
-        <!-- Courses -->
-        <MudItem xs="12" md="8">
-
-            <MudCard Elevation="1">
-
-                <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">
-                            My Courses
-                        </MudText>
-                    </CardHeaderContent>
-
-                    <CardHeaderActions>
-
-                        <MudButton Variant="Variant.Text"
-                                   Color="Color.Primary"
-                                   Href="/student-portal/courses">
-                            View All
-                        </MudButton>
-
-                    </CardHeaderActions>
-                </MudCardHeader>
-
-
-                <MudCardContent>
-
-                    <MudList>
-
-                        <MudListItem>
-                            <MudText Typo="Typo.body1">
-                                Software Engineering
+                            <MudText Typo="Typo.h6">
+                                Announcements
                             </MudText>
 
-                            <MudText Typo="Typo.body2"
-                                     Color="Color.Secondary">
-                                SE401
-                            </MudText>
+                        </CardHeaderContent>
 
-                            <MudChip Color="Color.Success"
-                                     Size="Size.Small">
-                                Active
-                            </MudChip>
-                        </MudListItem>
+                        <CardHeaderActions>
 
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Primary"
+                                       Href="/student-portal/announcements">
+                                View All
+                            </MudButton>
 
-                        <MudListItem>
-                            <MudText Typo="Typo.body1">
-                                Database Systems
-                            </MudText>
+                        </CardHeaderActions>
 
-                            <MudText Typo="Typo.body2"
-                                     Color="Color.Secondary">
-                                DB301
-                            </MudText>
-
-                            <MudChip Color="Color.Success"
-                                     Size="Size.Small">
-                                Active
-                            </MudChip>
-                        </MudListItem>
+                    </MudCardHeader>
 
 
-                        <MudListItem>
-                            <MudText Typo="Typo.body1">
-                                Web Development
-                            </MudText>
+                    <MudCardContent>
 
-                            <MudText Typo="Typo.body2"
-                                     Color="Color.Secondary">
-                                WD302
-                            </MudText>
+                        <MudStack Spacing="3">
 
-                            <MudChip Color="Color.Success"
-                                     Size="Size.Small">
-                                Active
-                            </MudChip>
-                        </MudListItem>
+                            <div>
 
-                    </MudList>
+                                <MudText Typo="Typo.subtitle2">
+                                    Semester Registration
+                                </MudText>
 
-                </MudCardContent>
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary">
+                                    Semester registration is now open.
+                                </MudText>
 
-            </MudCard>
+                                <MudText Typo="Typo.caption"
+                                         Color="Color.Secondary">
+                                    Today
+                                </MudText>
 
-        </MudItem>
+                            </div>
 
 
-        <!-- Announcements -->
-        <MudItem xs="12" md="4">
-
-            <MudCard Elevation="1">
-
-                <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">
-                            Announcements
-                        </MudText>
-                    </CardHeaderContent>
-
-                    <CardHeaderActions>
-
-                        <MudButton Variant="Variant.Text"
-                                   Color="Color.Primary"
-                                   Href="/student-portal/announcements">
-                            View All
-                        </MudButton>
-
-                    </CardHeaderActions>
-                </MudCardHeader>
+                            <MudDivider />
 
 
-                <MudCardContent>
+                            <div>
 
-                    <MudStack Spacing="3">
+                                <MudText Typo="Typo.subtitle2">
+                                    Exam Registration
+                                </MudText>
 
-                        <div>
-                            <MudText Typo="Typo.subtitle2">
-                                Semester Registration
-                            </MudText>
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary">
+                                    Check the examination registration deadline.
+                                </MudText>
 
-                            <MudText Typo="Typo.body2"
-                                     Color="Color.Secondary">
-                                Semester registration is now open.
-                            </MudText>
+                                <MudText Typo="Typo.caption"
+                                         Color="Color.Secondary">
+                                    2 days ago
+                                </MudText>
 
-                            <MudText Typo="Typo.caption"
-                                     Color="Color.Secondary">
-                                Today
-                            </MudText>
-                        </div>
+                            </div>
 
+                        </MudStack>
 
-                        <MudDivider />
+                    </MudCardContent>
 
+                </MudCard>
 
-                        <div>
-                            <MudText Typo="Typo.subtitle2">
-                                Exam Registration
-                            </MudText>
+            </MudItem>
 
-                            <MudText Typo="Typo.body2"
-                                     Color="Color.Secondary">
-                                Check the examination registration deadline.
-                            </MudText>
-
-                            <MudText Typo="Typo.caption"
-                                     Color="Color.Secondary">
-                                2 days ago
-                            </MudText>
-                        </div>
-
-                    </MudStack>
-
-                </MudCardContent>
-
-            </MudCard>
-
-        </MudItem>
-
-    </MudGrid>
+        </MudGrid>
+    }
 
 </MudContainer>
+
+
+@code {
+
+    private StudentProfile? profile;
+
+    private bool isLoading = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboard();
+    }
+
+
+    private async Task LoadDashboard()
+    {
+        try
+        {
+            isLoading = true;
+
+            profile =
+                await StudentProfileService
+                    .GetProfileAsync();
+        }
+        catch
+        {
+            Snackbar.Add(
+                "Unable to load dashboard.",
+                Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+}
