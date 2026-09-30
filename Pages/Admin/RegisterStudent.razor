@@ -1,0 +1,207 @@
+﻿@page "/admin/register-student"
+
+@using StudentManagement.Client.Models.AppUsers
+@using StudentManagement.Client.Models.Students
+@using StudentManagement.Client.Services.Interfaces
+
+@inject IStudentService StudentService
+@inject IAppUserService AppUserService
+
+<PageTitle>Register Student</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudPaper Elevation="2" Class="pa-6">
+
+        <MudText Typo="Typo.h5" Class="mb-6">
+            Register Student Login
+        </MudText>
+
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Create login credentials for an existing student.
+        </MudText>
+
+
+        <MudSelect T="int"
+                   Label="Select Student"
+                   Variant="Variant.Outlined"
+                   @bind-Value="selectedStudentId"
+                   Class="mb-4">
+
+            @foreach (var student in students)
+            {
+                <MudSelectItem T="int"
+                               Value="@student.Id">
+
+                    @student.AdmissionNumber -
+                    @student.FirstName @student.LastName
+
+                </MudSelectItem>
+            }
+
+        </MudSelect>
+
+
+        <MudTextField @bind-Value="password"
+                    Label="Password"
+                    InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                    Variant="Variant.Outlined"
+                    Adornment="Adornment.End"
+                    AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                    OnAdornmentClick="@(() => showPassword = !showPassword)"
+                    Class="mb-4" />
+
+        <MudTextField @bind-Value="confirmPassword"
+                    Label="Confirm Password"
+                    InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
+                    Variant="Variant.Outlined"
+                    Adornment="Adornment.End"
+                    AdornmentIcon="@(showConfirmPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                    OnAdornmentClick="@(() => showConfirmPassword = !showConfirmPassword)"
+                    Class="mb-4" />
+
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="RegisterStudentAccount"
+                   Disabled="@isRegistering">
+
+            @if (isRegistering)
+            {
+                <MudProgressCircular Size="Size.Small"
+                                     Indeterminate="true"
+                                     Class="mr-2" />
+
+                <span>Registering...</span>
+            }
+            else
+            {
+                <span>Register Student</span>
+            }
+
+        </MudButton>
+
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="@messageSeverity"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+
+@code {
+
+    private List<StudentDto> students = new();
+
+    private int selectedStudentId;
+
+    private string password = string.Empty;
+
+    private string confirmPassword = string.Empty;
+
+    private bool isRegistering;
+
+    private string message = string.Empty;
+
+    private Severity messageSeverity = Severity.Info;
+
+    private bool showPassword = false;
+    private bool showConfirmPassword = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allStudents =
+            await StudentService.GetAllAsync();
+
+        var registeredStudentIds =
+            await AppUserService
+                .GetRegisteredStudentIdsAsync();
+
+        students = allStudents
+            .Where(x =>
+                !registeredStudentIds.Contains(x.Id))
+            .ToList();
+    }
+
+
+    private async Task RegisterStudentAccount()
+    {
+        message = string.Empty;
+
+        if (selectedStudentId == 0)
+        {
+            message = "Please select a student.";
+            messageSeverity = Severity.Warning;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            message = "Please enter a password.";
+            messageSeverity = Severity.Warning;
+            return;
+        }
+
+        if (password != confirmPassword)
+        {
+            message = "Passwords do not match.";
+            messageSeverity = Severity.Warning;
+            return;
+        }
+
+        isRegistering = true;
+
+        try
+        {
+            var request = new RegisterStudentUserRequest
+            {
+                StudentId = selectedStudentId,
+                Password = password,
+                ConfirmPassword = confirmPassword
+            };
+
+            var success =
+                await AppUserService.RegisterStudentAsync(request);
+
+            if (success)
+            {
+                message =
+                    "Student login account registered successfully.";
+
+                messageSeverity = Severity.Success;
+
+                selectedStudentId = 0;
+                password = string.Empty;
+                confirmPassword = string.Empty;
+            }
+            else
+            {
+                message =
+                    "Student could not be registered. " +
+                    "The student may already have a login account.";
+
+                messageSeverity = Severity.Error;
+            }
+        }
+        catch
+        {
+            message =
+                "Something went wrong while registering the student.";
+
+            messageSeverity = Severity.Error;
+        }
+        finally
+        {
+            isRegistering = false;
+        }
+    }
+}
