@@ -11,9 +11,7 @@
 @inject IStudentCourseService StudentCourseService
 @inject ISnackbar Snackbar
 
-
 <PageTitle>My Courses</PageTitle>
-
 
 @if (isLoading)
 {
@@ -43,14 +41,14 @@ else
                  Color="Color.Secondary"
                  Class="mb-5">
 
-            View your enrolled course and course information
+            View your enrolled courses and course information
 
         </MudText>
 
 
-        @if (course == null)
+        @if (courses.Count == 0)
         {
-            <!-- NO COURSE -->
+            <!-- NO COURSES -->
 
             <MudPaper Elevation="0"
                       Class="p-5 bg-white border rounded-4 shadow-sm">
@@ -68,14 +66,14 @@ else
                     <MudText Typo="Typo.h5"
                              Class="fw-bold mb-2">
 
-                        No Course Assigned
+                        No Courses Assigned
 
                     </MudText>
 
                     <MudText Typo="Typo.body1"
                              Color="Color.Secondary">
 
-                        You haven't been assigned to a course yet.
+                        You haven't been assigned to any courses yet.
 
                     </MudText>
 
@@ -94,106 +92,182 @@ else
         }
         else
         {
-            <!-- COURSE CARD -->
+            <!-- COURSE CARDS -->
 
-            <MudPaper Elevation="0"
-                      Class="p-4 p-md-5 bg-white border rounded-4 shadow-sm">
+            @foreach (var course in courses)
+            {
+                <MudPaper Elevation="0"
+                          Class="p-4 p-md-5 bg-white border rounded-4 shadow-sm mb-4">
 
-                <!-- COURSE HEADER -->
+                    <!-- COURSE HEADER -->
 
-                <div class="d-flex flex-column flex-md-row
-                            justify-content-between
-                            align-items-md-start gap-3 mb-4">
+                    <div class="d-flex flex-column flex-md-row
+                                justify-content-between
+                                align-items-md-start gap-3 mb-4">
 
-                    <div>
+                        <div>
 
-                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2 mb-2">
 
-                            <MudIcon Icon="@Icons.Material.Filled.School"
-                                     Color="Color.Primary" />
+                                <MudIcon Icon="@Icons.Material.Filled.School"
+                                         Color="Color.Primary" />
 
-                            <MudText Typo="Typo.subtitle1"
-                                     Color="Color.Primary"
-                                     Class="fw-bold">
+                                <MudText Typo="Typo.subtitle1"
+                                         Color="Color.Primary"
+                                         Class="fw-bold">
 
-                                @course.CourseCode
+                                    @course.CourseCode
+
+                                </MudText>
+
+                            </div>
+
+
+                            <MudText Typo="Typo.h4"
+                                     Class="fw-bold mb-2">
+
+                                @course.CourseName
+
+                            </MudText>
+
+
+                            <MudText Typo="Typo.body1"
+                                     Color="Color.Secondary">
+
+                                @(string.IsNullOrWhiteSpace(
+                                    course.Description)
+                                    ? "No course description available."
+                                    : course.Description)
 
                             </MudText>
 
                         </div>
 
 
-                        <MudText Typo="Typo.h4"
-                                 Class="fw-bold mb-2">
+                        <MudChip T="string"
+                                 Size="Size.Small"
+                                 Color="@(course.IsActive
+                                     ? Color.Success
+                                     : Color.Error)">
 
-                            @course.CourseName
+                            @(course.IsActive
+                                ? "Active"
+                                : "Inactive")
 
-                        </MudText>
-
-
-                        <MudText Typo="Typo.body1"
-                                 Color="Color.Secondary">
-
-                            @(string.IsNullOrWhiteSpace(
-                                course.Description)
-                                ? "No course description available."
-                                : course.Description)
-
-                        </MudText>
+                        </MudChip>
 
                     </div>
 
 
-                    <MudChip T="string"
-                             Size="Size.Small"
-                             Color="@(course.IsActive
-                                 ? Color.Success
-                                 : Color.Error)">
-
-                        @(course.IsActive
-                            ? "Active"
-                            : "Inactive")
-
-                    </MudChip>
-
-                </div>
+                    <MudDivider Class="mb-4" />
 
 
-                <MudDivider Class="mb-4" />
+                    <!-- COURSE INFORMATION -->
 
+                    <div class="row g-4">
 
-                <!-- COURSE INFORMATION -->
+                        <!-- CREDITS -->
 
-                <div class="row g-4">
+                        <div class="col-12 col-md-4">
 
-                    <!-- CREDITS -->
+                            <div class="course-info-box">
 
-                    <div class="col-12 col-md-4">
+                                <div class="course-info-icon">
 
-                        <div class="course-info-box">
+                                    <MudIcon Icon="@Icons.Material.Filled.Grade"
+                                             Color="Color.Primary" />
 
-                            <div class="course-info-icon">
+                                </div>
 
-                                <MudIcon Icon="@Icons.Material.Filled.Grade"
-                                         Color="Color.Primary" />
+                                <div>
+
+                                    <MudText Typo="Typo.body2"
+                                             Color="Color.Secondary">
+
+                                        Credits
+
+                                    </MudText>
+
+                                    <MudText Typo="Typo.h6"
+                                             Class="fw-bold">
+
+                                        @course.Credits
+
+                                    </MudText>
+
+                                </div>
 
                             </div>
 
-                            <div>
+                        </div>
 
-                                <MudText Typo="Typo.body2"
-                                         Color="Color.Secondary">
 
-                                    Credits
+                        <!-- DURATION -->
 
-                                </MudText>
+                        <div class="col-12 col-md-4">
 
-                                <MudText Typo="Typo.h6"
-                                         Class="fw-bold">
+                            <div class="course-info-box">
 
-                                    @course.Credits
+                                <div class="course-info-icon">
 
-                                </MudText>
+                                    <MudIcon Icon="@Icons.Material.Filled.Schedule"
+                                             Color="Color.Primary" />
+
+                                </div>
+
+                                <div>
+
+                                    <MudText Typo="Typo.body2"
+                                             Color="Color.Secondary">
+
+                                        Duration
+
+                                    </MudText>
+
+                                    <MudText Typo="Typo.h6"
+                                             Class="fw-bold">
+
+                                        @course.Duration Months
+
+                                    </MudText>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TEACHER -->
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="course-info-box">
+
+                                <div class="course-info-icon">
+
+                                    <MudIcon Icon="@Icons.Material.Filled.Person"
+                                             Color="Color.Primary" />
+
+                                </div>
+
+                                <div>
+
+                                    <MudText Typo="Typo.body2"
+                                             Color="Color.Secondary">
+
+                                        Instructor
+
+                                    </MudText>
+
+                                    <MudText Typo="Typo.h6"
+                                             Class="fw-bold">
+
+                                        @GetTeacherName(course)
+
+                                    </MudText>
+
+                                </div>
 
                             </div>
 
@@ -202,91 +276,18 @@ else
                     </div>
 
 
-                    <!-- DURATION -->
+                    <!-- INFORMATION MESSAGE -->
 
-                    <div class="col-12 col-md-4">
+                    <MudAlert Severity="Severity.Info"
+                              Variant="Variant.Text"
+                              Class="mt-4">
 
-                        <div class="course-info-box">
+                        Course information is managed by the institution.
 
-                            <div class="course-info-icon">
+                    </MudAlert>
 
-                                <MudIcon Icon="@Icons.Material.Filled.Schedule"
-                                         Color="Color.Primary" />
-
-                            </div>
-
-                            <div>
-
-                                <MudText Typo="Typo.body2"
-                                         Color="Color.Secondary">
-
-                                    Duration
-
-                                </MudText>
-
-                                <MudText Typo="Typo.h6"
-                                         Class="fw-bold">
-
-                                    @course.Duration Months
-
-                                </MudText>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- TEACHER -->
-
-                    <div class="col-12 col-md-4">
-
-                        <div class="course-info-box">
-
-                            <div class="course-info-icon">
-
-                                <MudIcon Icon="@Icons.Material.Filled.Person"
-                                         Color="Color.Primary" />
-
-                            </div>
-
-                            <div>
-
-                                <MudText Typo="Typo.body2"
-                                         Color="Color.Secondary">
-
-                                    Instructor
-
-                                </MudText>
-
-                                <MudText Typo="Typo.h6"
-                                         Class="fw-bold">
-
-                                    @GetTeacherName()
-
-                                </MudText>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- INFORMATION MESSAGE -->
-
-                <MudAlert Severity="Severity.Info"
-                          Variant="Variant.Text"
-                          Class="mt-4">
-
-                    Course information is managed by the institution.
-
-                </MudAlert>
-
-            </MudPaper>
+                </MudPaper>
+            }
         }
 
     </div>
@@ -336,26 +337,26 @@ else
 
 @code {
 
-    private MyCourseDto? course;
+    private List<MyCourseDto> courses = new();
 
     private bool isLoading = true;
 
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadCourse();
+        await LoadCourses();
     }
 
 
-    private async Task LoadCourse()
+    private async Task LoadCourses()
     {
         try
         {
             isLoading = true;
 
-            course =
+            courses =
                 await StudentCourseService
-                    .GetMyCourseAsync();
+                    .GetMyCoursesAsync();
         }
         catch
         {
@@ -370,10 +371,10 @@ else
     }
 
 
-    private string GetTeacherName()
+    private string GetTeacherName(
+        MyCourseDto course)
     {
-        if (course == null ||
-            string.IsNullOrWhiteSpace(
+        if (string.IsNullOrWhiteSpace(
                 course.TeacherName))
         {
             return "Not assigned";

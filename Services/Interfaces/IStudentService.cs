@@ -23,7 +23,6 @@ namespace StudentManagement.Client.Services.Interfaces
     int studentId,
     int courseId);
 
-        Task<bool> RemoveCourseAsync(
-            int studentId);
+        Task<bool> RemoveCourseAsync(int studentId, int courseId);
     }
 }

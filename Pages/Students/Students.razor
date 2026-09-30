@@ -114,7 +114,7 @@
                     <MudTh>Gender</MudTh>
                     <MudTh>Phone</MudTh>
                     <MudTh>Enrollment Date</MudTh>
-                    <MudTh>Assigned Course</MudTh>
+                    <MudTh>Assigned Courses</MudTh>
                     <MudTh>Status</MudTh>
                     <MudTh>Actions</MudTh>
                 </HeaderContent>
@@ -137,9 +137,23 @@
                     </MudTd>
                     <MudTd DataLabel="Phone">@context.Phone</MudTd>
                     <MudTd DataLabel="Enrollment Date">@context.EnrollmentDate.ToString("MMM dd, yyyy")</MudTd>
-                    <MudTd DataLabel="Assigned Course">
+                    <MudTd DataLabel="Assigned Courses">
                         <div class="student-course-cell">
-                            <span>@(context.CourseName ?? "Unassigned")</span>
+                            @if (context.Courses == null || context.Courses.Count == 0)
+                            {
+                                <span>Unassigned</span>
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column gap-1">
+                                    @foreach (var course in context.Courses)
+                                    {
+                                        <span>
+                                            @course.CourseCode - @course.CourseName
+                                        </span>
+                                    }
+                                </div>
+                            }
                         </div>
                     </MudTd>
                     <MudTd DataLabel="Status">
@@ -282,7 +296,9 @@
 
             if (courseFilter != "All" && int.TryParse(courseFilter, out int courseId))
             {
-                result = result.Where(s => s.CourseId == courseId);
+                result = result.Where(s =>
+                    s.Courses != null &&
+                    s.Courses.Any(c => c.Id == courseId));
             }
 
             return result;

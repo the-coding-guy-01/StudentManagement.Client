@@ -6,7 +6,8 @@ namespace StudentManagement.Client.Models.StudentCourses
     {
         public StudentDto Student { get; set; } = new();
 
-        public string ZoneIdentifier { get; set; }
-            = "unassigned";
+        public int? CourseId { get; set; }
+
+        public string ZoneIdentifier { get; set; } = "unassigned";
     }
 }

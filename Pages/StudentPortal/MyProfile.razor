@@ -579,11 +579,28 @@ else
 
                     <div class="academic-row">
 
-                        <span>Assigned Course</span>
+                        <span>Assigned Courses</span>
 
-                        <strong>
-                            @GetCourseDisplay()
-                        </strong>
+                        <div class="d-flex flex-column gap-1">
+
+                            @if (profile.Courses == null ||
+                                 profile.Courses.Count == 0)
+                            {
+                                <strong>
+                                    Not assigned
+                                </strong>
+                            }
+                            else
+                            {
+                                @foreach (var course in profile.Courses)
+                                {
+                                    <strong>
+                                        @course.CourseCode - @course.CourseName
+                                    </strong>
+                                }
+                            }
+
+                        </div>
 
                     </div>
 
@@ -987,28 +1004,5 @@ else
 
         return $"{first}{last}"
             .ToUpperInvariant();
-    }
-
-
-    private string GetCourseDisplay()
-    {
-        if (profile == null ||
-            string.IsNullOrWhiteSpace(
-                profile.CourseName))
-        {
-            return "Not assigned";
-        }
-
-
-        if (string.IsNullOrWhiteSpace(
-                profile.CourseCode))
-        {
-            return profile.CourseName;
-        }
-
-
-        return
-            $"{profile.CourseCode} - " +
-            $"{profile.CourseName}";
     }
 }

@@ -1,4 +1,5 @@
-﻿@page "/student-course-assignment"
+﻿```razor
+@page "/student-course-assignment"
 
 @using MudBlazor
 @using StudentManagement.Client.Models.Students
@@ -26,7 +27,8 @@
 
         <MudText Typo="Typo.body2"
                  Color="Color.Secondary">
-            Drag students and drop them into a course.
+            Drag students into courses to assign them.
+            Students can be assigned to multiple courses.
         </MudText>
 
     </div>
@@ -72,7 +74,7 @@
                                         </h5>
 
                                         <small class="text-muted">
-                                            Drag students into a course
+                                            Students with no courses
                                         </small>
                                     </div>
 
@@ -104,6 +106,7 @@
                     <!-- ==================================== -->
                     <!-- COURSES -->
                     <!-- ==================================== -->
+
                     @foreach (var course in courses)
                     {
                         <div class="col-12 col-md-6 col-lg-4">
@@ -195,6 +198,18 @@
                             </div>
 
 
+                            @if (context.CourseId.HasValue)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               Title="Remove from this course"
+                                               OnClick="@(() => RemoveCourse(
+                                                   context.Student.Id,
+                                                   context.CourseId.Value))" />
+                            }
+
+
                             <MudIcon Icon="@Icons.Material.Filled.DragIndicator"
                                      Color="Color.Secondary" />
 
@@ -243,17 +258,47 @@
             courses =
                 await CourseService.GetAllAsync();
 
-            studentItems = students
-                .Select(student => new StudentDragItem
-                {
-                    Student = student,
 
-                    ZoneIdentifier =
-                        student.CourseId.HasValue
-                            ? GetCourseZone(student.CourseId.Value)
-                            : "unassigned"
-                })
-                .ToList();
+            studentItems = new();
+
+
+            foreach (var student in students)
+            {
+                // ==========================================
+                // STUDENT HAS NO COURSES
+                // ==========================================
+
+                if (student.Courses == null ||
+                    student.Courses.Count == 0)
+                {
+                    studentItems.Add(
+                        new StudentDragItem
+                        {
+                            Student = student,
+                            CourseId = null,
+                            ZoneIdentifier = "unassigned"
+                        });
+
+                    continue;
+                }
+
+
+                // ==========================================
+                // STUDENT HAS MULTIPLE COURSES
+                // ==========================================
+
+                foreach (var course in student.Courses)
+                {
+                    studentItems.Add(
+                        new StudentDragItem
+                        {
+                            Student = student,
+                            CourseId = course.Id,
+                            ZoneIdentifier =
+                                GetCourseZone(course.Id)
+                        });
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -283,7 +328,10 @@
             dropInfo.DropzoneIdentifier;
 
 
-        // Dropped into same place
+        // ==========================================
+        // DROPPED INTO SAME COURSE
+        // ==========================================
+
         if (item.ZoneIdentifier == newZone)
         {
             return;
@@ -292,15 +340,29 @@
 
         try
         {
-            // ==============================
-            // REMOVE COURSE
-            // ==============================
+            // ==========================================
+            // DROP INTO UNASSIGNED
+            // ==========================================
 
             if (newZone == "unassigned")
             {
+                // If the student has a course relationship,
+                // remove that specific relationship.
+
+                if (!item.CourseId.HasValue)
+                {
+                    return;
+                }
+
+
+                var courseId =
+                    item.CourseId.Value;
+
+
                 var success =
                     await StudentService.RemoveCourseAsync(
-                        item.Student.Id);
+                        item.Student.Id,
+                        courseId);
 
 
                 if (!success)
@@ -313,76 +375,92 @@
                 }
 
 
-                item.Student.CourseId = null;
-                item.Student.CourseName = null;
-
-
-                Snackbar.Add(
-                    $"{item.Student.FirstName} is now unassigned.",
-                    Severity.Success);
-            }
-
-            // ==============================
-            // ASSIGN COURSE
-            // ==============================
-
-            else
-            {
-                var courseId =
-                    GetCourseIdFromZone(newZone);
-
-
-                if (courseId == null)
-                {
-                    Snackbar.Add(
-                        "Invalid course.",
-                        Severity.Error);
-
-                    return;
-                }
-
-
-                var updatedStudent =
-                    await StudentService.AssignCourseAsync(
-                        item.Student.Id,
-                        courseId.Value);
-
-
-                if (updatedStudent == null)
-                {
-                    Snackbar.Add(
-                        "Unable to assign student.",
-                        Severity.Error);
-
-                    return;
-                }
-
-
-                item.Student.CourseId =
-                    updatedStudent.CourseId;
-
-                item.Student.CourseName =
-                    updatedStudent.CourseName;
-
-
                 var course =
                     courses.FirstOrDefault(
-                        c => c.Id == courseId.Value);
+                        c => c.Id == courseId);
 
 
                 Snackbar.Add(
-                    $"{item.Student.FirstName} assigned to {course?.CourseName}.",
+                    $"{item.Student.FirstName} removed from {course?.CourseName}.",
                     Severity.Success);
+
+
+                await LoadData();
+
+                dropContainer?.Refresh();
+
+                return;
             }
 
 
-            // Move the student card
-            item.ZoneIdentifier = newZone;
+            // ==========================================
+            // GET TARGET COURSE
+            // ==========================================
+
+            var newCourseId =
+                GetCourseIdFromZone(newZone);
 
 
-            // Refresh MudBlazor drag/drop
+            if (!newCourseId.HasValue)
+            {
+                Snackbar.Add(
+                    "Invalid course.",
+                    Severity.Error);
+
+                return;
+            }
+
+
+            // ==========================================
+            // ALREADY ASSIGNED TO THIS COURSE
+            // ==========================================
+
+            if (item.CourseId == newCourseId.Value)
+            {
+                return;
+            }
+
+
+            // ==========================================
+            // ASSIGN ADDITIONAL COURSE
+            // ==========================================
+
+            var updatedStudent =
+                await StudentService.AssignCourseAsync(
+                    item.Student.Id,
+                    newCourseId.Value);
+
+
+            if (updatedStudent == null)
+            {
+                Snackbar.Add(
+                    "Unable to assign student.",
+                    Severity.Error);
+
+                return;
+            }
+
+
+            var courseToAssign =
+                courses.FirstOrDefault(
+                    c => c.Id == newCourseId.Value);
+
+
+            Snackbar.Add(
+                $"{item.Student.FirstName} assigned to {courseToAssign?.CourseName}.",
+                Severity.Success);
+
+
+            // ==========================================
+            // RELOAD
+            // ==========================================
+
+            // We reload because the student can now
+            // exist in BOTH course columns.
+
+            await LoadData();
+
             dropContainer?.Refresh();
-
 
             StateHasChanged();
         }
@@ -392,7 +470,55 @@
                 $"Something went wrong: {ex.Message}",
                 Severity.Error);
 
-            // Reload actual database state if API failed
+            await LoadData();
+
+            dropContainer?.Refresh();
+        }
+    }
+
+
+    private async Task RemoveCourse(
+        int studentId,
+        int courseId)
+    {
+        try
+        {
+            var success =
+                await StudentService.RemoveCourseAsync(
+                    studentId,
+                    courseId);
+
+
+            if (!success)
+            {
+                Snackbar.Add(
+                    "Unable to remove student from course.",
+                    Severity.Error);
+
+                return;
+            }
+
+
+            var course =
+                courses.FirstOrDefault(
+                    c => c.Id == courseId);
+
+
+            Snackbar.Add(
+                $"Student removed from {course?.CourseName}.",
+                Severity.Success);
+
+
+            await LoadData();
+
+            dropContainer?.Refresh();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                $"Something went wrong: {ex.Message}",
+                Severity.Error);
+
             await LoadData();
 
             dropContainer?.Refresh();
@@ -434,16 +560,14 @@
     private int GetStudentCount(int courseId)
     {
         return studentItems.Count(
-            x => x.ZoneIdentifier ==
-                 GetCourseZone(courseId));
+            x => x.CourseId == courseId);
     }
 
 
     private int GetUnassignedCount()
     {
         return studentItems.Count(
-            x => x.ZoneIdentifier ==
-                 "unassigned");
+            x => !x.CourseId.HasValue);
     }
 
 
@@ -465,3 +589,4 @@
         return $"{first}{last}".ToUpper();
     }
 }
+```

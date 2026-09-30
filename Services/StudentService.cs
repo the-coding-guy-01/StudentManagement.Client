@@ -120,12 +120,20 @@ namespace StudentManagement.Client.Services
         }
 
         public async Task<bool> RemoveCourseAsync(
-    int studentId)
+    int studentId,
+    int courseId)
         {
             var response = await _http.DeleteAsync(
-                $"api/students/{studentId}/course");
+                $"api/students/{studentId}/course/{courseId}");
 
-            return response.IsSuccessStatusCode;
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return true;
         }
     }
 }

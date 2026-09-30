@@ -31,10 +31,28 @@
 
         public bool IsActive { get; set; }
 
-        public string? CourseCode { get; set; }
-
-        public string? CourseName { get; set; }
+        public List<StudentProfileCourse> Courses { get; set; }
+            = new List<StudentProfileCourse>();
 
         public string? ProfileImageUrl { get; set; }
+    }
+
+    public class StudentProfileCourse
+    {
+        public int CourseId { get; set; }
+
+        public string CourseCode { get; set; }
+            = string.Empty;
+
+        public string CourseName { get; set; }
+            = string.Empty;
+
+        public string? Description { get; set; }
+
+        public int Credits { get; set; }
+
+        public int Duration { get; set; }
+
+        public string? TeacherName { get; set; }
     }
 }

@@ -95,7 +95,31 @@
                 </MudText>
                 @DetailRow(Icons.Material.Filled.AccountBalance, "Admission Number", student.AdmissionNumber)
                 @DetailRow(Icons.Material.Filled.CalendarMonth, "Enrollment Date", student.EnrollmentDate.ToString("MMMM dd, yyyy"))
-                @DetailRow(Icons.Material.Filled.MenuBook, "Assigned Course", student.CourseName ?? "Unassigned")
+                <div class="student-detail-row">
+                    <MudIcon Icon="@Icons.Material.Filled.MenuBook" />
+
+                    <span class="student-detail-label">
+                        Assigned Courses
+                    </span>
+
+                    <div class="student-detail-value">
+                        @if (student.Courses == null || student.Courses.Count == 0)
+                        {
+                            <span>Unassigned</span>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-1">
+                                @foreach (var course in student.Courses)
+                                {
+                                    <span>
+                                        @course.CourseCode - @course.CourseName
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     }

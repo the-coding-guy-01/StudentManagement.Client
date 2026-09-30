@@ -1,4 +1,6 @@
-﻿namespace StudentManagement.Client.Models.Students
+﻿using StudentManagement.Client.Models.Courses;
+
+namespace StudentManagement.Client.Models.Students
 {
     public class StudentDto
     {
@@ -24,9 +26,8 @@
 
         public bool IsActive { get; set; }
 
-        public int? CourseId { get; set; }
-
-        public string? CourseName { get; set; }
+        public List<CourseDto> Courses { get; set; }
+            = new List<CourseDto>();
 
     }
 }

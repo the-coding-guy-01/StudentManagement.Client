@@ -10,34 +10,30 @@ namespace StudentManagement.Client.Services
     {
         private readonly HttpClient _httpClient;
 
-
         public StudentCourseService(
             HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-
-        public async Task<MyCourseDto?>
-            GetMyCourseAsync()
+        public async Task<List<MyCourseDto>>
+            GetMyCoursesAsync()
         {
             var response =
                 await _httpClient.GetAsync(
                     "api/student/courses");
 
-
             if (response.StatusCode ==
                 HttpStatusCode.NotFound)
             {
-                return null;
+                return new List<MyCourseDto>();
             }
-
 
             response.EnsureSuccessStatusCode();
 
-
             return await response.Content
-                .ReadFromJsonAsync<MyCourseDto>();
+                .ReadFromJsonAsync<List<MyCourseDto>>()
+                ?? new List<MyCourseDto>();
         }
     }
 }
