@@ -878,7 +878,7 @@ else if (dashboard is not null)
                                                text-start
                                                w-100 h-100
                                                p-3"
-                                        @onclick="@(() => Navigation.NavigateTo("/students/add"))">
+                                        @onclick="@(() => Navigation.NavigateTo("/admin/users/add?role=Student"))">
 
                                     <div class="d-flex align-items-center gap-3">
 
@@ -950,7 +950,7 @@ else if (dashboard is not null)
                                                text-start
                                                w-100 h-100
                                                p-3"
-                                        @onclick="@(() => Navigation.NavigateTo("/teachers/add"))">
+                                        @onclick="@(() => Navigation.NavigateTo("/admin/users/add?role=Teacher"))">
 
                                     <div class="d-flex align-items-center gap-3">
 

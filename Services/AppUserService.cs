@@ -13,6 +13,12 @@ namespace StudentManagement.Client.Services
             _httpClient = httpClient;
         }
 
+        public async Task<bool> CreateUserAsync(CreateUserRequest request)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/AppUsers", request);
+            return response.IsSuccessStatusCode;
+        }
+
 
         public async Task<bool> RegisterStudentAsync(
             RegisterStudentUserRequest request)

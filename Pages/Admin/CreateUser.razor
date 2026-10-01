@@ -1,0 +1,88 @@
+@page "/admin/users/add"
+@using Microsoft.AspNetCore.Authorization
+@using StudentManagement.Client.Models.AppUsers
+@using StudentManagement.Client.Services.Interfaces
+@attribute [Authorize(Roles = "Admin")]
+@inject IAppUserService AppUserService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Create User</PageTitle>
+<div class="container py-4" style="max-width: 900px">
+    <MudText Typo="Typo.h4" Class="mb-2">Create User</MudText>
+    <MudText Typo="Typo.body1" Class="mb-5">Create a student or teacher and set their login password.</MudText>
+    <MudPaper Class="pa-6" Elevation="2">
+        <EditForm Model="request" OnValidSubmit="SubmitUser">
+            <DataAnnotationsValidator />
+            <MudGrid Spacing="3">
+                <MudItem xs="12" md="6">
+                    <MudSelect T="string" Label="Role" Variant="Variant.Outlined" @bind-Value="request.Role">
+                        <MudSelectItem Value="@("Student")">Student</MudSelectItem><MudSelectItem Value="@("Teacher")">Teacher</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="6"><MudTextField Label="First Name" Variant="Variant.Outlined" @bind-Value="request.FirstName" For="@(() => request.FirstName)" Required="true" /></MudItem>
+                <MudItem xs="12" md="6"><MudTextField Label="Last Name" Variant="Variant.Outlined" @bind-Value="request.LastName" For="@(() => request.LastName)" Required="true" /></MudItem>
+                <MudItem xs="12" md="6"><MudTextField Label="Email" InputType="InputType.Email" Variant="Variant.Outlined" @bind-Value="request.Email" For="@(() => request.Email)" Required="true" /></MudItem>
+                <MudItem xs="12" md="6"><MudTextField Label="Phone" Variant="Variant.Outlined" @bind-Value="request.Phone" /></MudItem>
+                <MudItem xs="12" md="6"><MudDatePicker Label="Date of Birth" Variant="Variant.Outlined" @bind-Date="request.DateOfBirth" /></MudItem>
+                <MudItem xs="12" md="6">
+                    <MudSelect T="string" Label="Gender" Variant="Variant.Outlined" @bind-Value="request.Gender">
+                        <MudSelectItem Value="@("Male")">Male</MudSelectItem><MudSelectItem Value="@("Female")">Female</MudSelectItem><MudSelectItem Value="@("Other")">Other</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                @if (request.Role == "Student")
+                {
+                    <MudItem xs="12" md="6"><MudDatePicker Label="Enrollment Date" Variant="Variant.Outlined" Required="true" @bind-Date="request.EnrollmentDate" /></MudItem>
+                }
+                else
+                {
+                    <MudItem xs="12" md="6"><MudDatePicker Label="Joining Date" Variant="Variant.Outlined" Required="true" @bind-Date="request.JoinDate" /></MudItem>
+                }
+                <MudItem xs="12" md="6"><MudTextField Label="Password" InputType="InputType.Password" Variant="Variant.Outlined" @bind-Value="request.Password" For="@(() => request.Password)" Required="true" /></MudItem>
+                <MudItem xs="12" md="6"><MudTextField Label="Confirm Password" InputType="InputType.Password" Variant="Variant.Outlined" @bind-Value="request.ConfirmPassword" For="@(() => request.ConfirmPassword)" Required="true" /></MudItem>
+            </MudGrid>
+            <div class="d-flex justify-end gap-3 mt-6">
+                <MudButton Variant="Variant.Outlined" OnClick="Cancel">Cancel</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="saving">@(saving ? "Creating..." : "Create User")</MudButton>
+            </div>
+        </EditForm>
+    </MudPaper>
+</div>
+
+@code {
+    private CreateUserRequest request = new();
+    private bool saving;
+    protected override void OnInitialized()
+    {
+        var role = new Uri(Navigation.Uri).Query.TrimStart('?').Split('&')
+            .Select(part => part.Split('=', 2))
+            .FirstOrDefault(parts => parts.Length == 2 && parts[0] == "role");
+        if (role is { Length: 2 })
+        {
+            var value = Uri.UnescapeDataString(role[1]);
+            if (value is "Student" or "Teacher") request.Role = value;
+        }
+    }
+    private void Cancel() => Navigation.NavigateTo(request.Role == "Student" ? "/students" : "/teachers");
+    private async Task SubmitUser()
+    {
+        if (saving) return;
+        if ((request.Role == "Student" && request.EnrollmentDate == null) || (request.Role == "Teacher" && request.JoinDate == null))
+        {
+            Snackbar.Add(request.Role == "Student" ? "Enrollment date is required." : "Joining date is required.", Severity.Warning);
+            return;
+        }
+        saving = true;
+        try
+        {
+            if (await AppUserService.CreateUserAsync(request))
+            {
+                Snackbar.Add($"{request.Role} and login created successfully.", Severity.Success);
+                Navigation.NavigateTo(request.Role == "Student" ? "/students" : "/teachers");
+            }
+            else Snackbar.Add("Could not create user. Check that the email is not already in use.", Severity.Error);
+        }
+        catch { Snackbar.Add("An error occurred while creating the user.", Severity.Error); }
+        finally { saving = false; }
+    }
+}
