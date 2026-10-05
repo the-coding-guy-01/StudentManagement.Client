@@ -80,4 +80,6 @@ builder.Services.AddScoped<
 
 builder.Services.AddScoped<IAppUserService, AppUserService>();
 
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+
 await builder.Build().RunAsync();

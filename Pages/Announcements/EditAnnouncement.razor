@@ -1,0 +1,255 @@
+﻿@page "/announcements/edit/{Id:int}"
+
+@using StudentManagement.Client.Models.Announcements
+@using StudentManagement.Client.Services.Interfaces
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IAnnouncementService AnnouncementService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Edit Announcement</PageTitle>
+
+<div class="student-admin-page announcement-editor-page">
+    <div class="student-page-heading announcement-editor-heading">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Edit"
+                     Class="student-heading-icon" />
+            <div>
+                <MudText Typo="Typo.h3"
+                         Class="student-page-title">
+                    Edit announcement
+                </MudText>
+                <MudText Typo="Typo.body1"
+                         Class="student-page-subtitle">
+                    Review and update the message shared with your school community.
+                </MudText>
+            </div>
+        </MudStack>
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="Cancel"
+                   Class="announcement-back-button">
+            Back to announcements
+        </MudButton>
+    </div>
+
+    @if (isLoading)
+    {
+        <MudPaper Class="student-form-card pa-8"
+                  Elevation="0">
+            <MudStack AlignItems="AlignItems.Center"
+                      Justify="Justify.Center">
+                <MudProgressCircular Color="Color.Primary"
+                                     Indeterminate="true" />
+                <MudText Class="mt-3">
+                    Loading announcement...
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="announcement-load-error">
+            @errorMessage
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Error"
+                       StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="LoadAnnouncement">
+                Try again
+            </MudButton>
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="student-form-card pa-6"
+                  Elevation="0">
+            <EditForm Model="@announcement"
+                      OnValidSubmit="UpdateAnnouncement">
+                <DataAnnotationsValidator />
+                <MudStack Spacing="4">
+                    <div class="announcement-form-intro">
+                        <MudText Typo="Typo.h6" Class="announcement-form-title">
+                            Announcement details
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="announcement-form-description">
+                            Make any necessary changes, then save to update the announcement.
+                        </MudText>
+                    </div>
+
+                    <MudTextField @bind-Value="announcement.Title"
+                                  Label="Title"
+                                  Placeholder="Enter a clear, specific title"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  RequiredError="Title is required."
+                                  HelperText="Use a short, specific title."
+                                  MaxLength="120"
+                                  FullWidth="true" />
+
+                    <MudTextField @bind-Value="announcement.Message"
+                                  Label="Message"
+                                  Placeholder="Write the details readers need to know..."
+                                  Variant="Variant.Outlined"
+                                  Lines="6"
+                                  Required="true"
+                                  RequiredError="Message is required."
+                                  HelperText="Include relevant dates, actions, or contact details."
+                                  FullWidth="true" />
+
+                    <div class="announcement-status-panel">
+                        <div>
+                            <MudText Typo="Typo.subtitle1" Class="announcement-status-title">
+                                Publication status
+                            </MudText>
+                            <MudText Typo="Typo.body2" Class="announcement-status-description">
+                                @(announcement.IsActive
+                                    ? "This announcement is active."
+                                    : "This announcement is inactive.")
+                            </MudText>
+                        </div>
+                        <MudSwitch @bind-Value="announcement.IsActive"
+                                   Color="Color.Primary"
+                                   Label="Active" />
+                    </div>
+
+                    <MudStack Row="true"
+                              Justify="Justify.FlexEnd"
+                              Spacing="2"
+                              Class="announcement-form-actions mt-3">
+                        <MudButton Variant="Variant.Outlined"
+                                   OnClick="Cancel"
+                                   Disabled="isSaving"
+                                   Class="announcement-cancel-button">
+                            Cancel
+                        </MudButton>
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   Disabled="isSaving"
+                                   Class="announcement-submit-button">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Size="Size.Small"
+                                                     Indeterminate="true"
+                                                     Class="mr-2" />
+                                <span>Updating...</span>
+                            }
+                            else
+                            {
+                                <span>Save changes</span>
+                            }
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </EditForm>
+        </MudPaper>
+    }
+
+</div>
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private UpdateAnnouncementDto announcement = new();
+
+    private bool isLoading = true;
+
+    private bool isSaving;
+
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAnnouncement();
+    }
+
+
+    private async Task LoadAnnouncement()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await AnnouncementService
+                .GetAnnouncementByIdAsync(Id);
+
+            if (result == null)
+            {
+                errorMessage = "Announcement not found.";
+                return;
+            }
+
+            announcement.Title = result.Title;
+            announcement.Message = result.Message;
+            announcement.IsActive = result.IsActive;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load announcement.";
+
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private async Task UpdateAnnouncement()
+    {
+        isSaving = true;
+
+        try
+        {
+            var result = await AnnouncementService
+                .UpdateAnnouncementAsync(Id, announcement);
+
+            if (result != null)
+            {
+                Snackbar.Add(
+                    "Announcement updated successfully.",
+                    Severity.Success
+                );
+
+                Navigation.NavigateTo("/announcements");
+            }
+            else
+            {
+                Snackbar.Add(
+                    "Announcement not found.",
+                    Severity.Error
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                "Failed to update announcement.",
+                Severity.Error
+            );
+
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/announcements");
+    }
+
+}

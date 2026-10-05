@@ -1,0 +1,79 @@
+.announcement-editor-page {
+    max-width: 960px;
+    margin-inline: auto;
+}
+
+.announcement-editor-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.announcement-editor-page ::deep .student-heading-icon {
+    font-size: 3.5em !important;
+}
+
+.announcement-back-button,
+.announcement-cancel-button,
+.announcement-submit-button {
+    border-radius: 10px;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.announcement-back-button {
+    flex-shrink: 0;
+}
+
+.announcement-editor-page ::deep .student-form-card {
+    padding: 32px !important;
+    border-radius: 18px;
+}
+
+.announcement-form-intro {
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e8eef7;
+}
+
+.announcement-form-title {
+    color: #18345e;
+    font-weight: 800;
+}
+
+.announcement-form-description {
+    margin-top: 5px;
+    color: #687b98;
+    line-height: 1.55;
+}
+
+.announcement-form-actions {
+    padding-top: 22px;
+    border-top: 1px solid #e8eef7;
+}
+
+.announcement-cancel-button,
+.announcement-submit-button {
+    min-width: 156px;
+    min-height: 46px;
+}
+
+@media (max-width: 600px) {
+    .announcement-editor-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .announcement-editor-page ::deep .student-form-card {
+        padding: 22px !important;
+    }
+
+    .announcement-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .announcement-cancel-button,
+    .announcement-submit-button {
+        width: 100%;
+    }
+}

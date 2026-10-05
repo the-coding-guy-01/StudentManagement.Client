@@ -1,0 +1,473 @@
+﻿@page "/announcements"
+
+@using StudentManagement.Client.Models.Announcements
+@using StudentManagement.Client.Services.Interfaces
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IAnnouncementService AnnouncementService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Announcements</PageTitle>
+
+<div class="student-admin-page">
+
+    <div class="student-page-heading announcement-heading">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Campaign"
+                     Class="student-heading-icon" />
+
+            <div>
+                <MudText Typo="Typo.h3" Class="student-page-title">
+                    Announcements
+                </MudText>
+
+                <MudText Typo="Typo.body1" Class="student-page-subtitle">
+                    Manage announcements
+                </MudText>
+            </div>
+        </MudStack>
+    </div>
+
+
+    <!-- Toolbar -->
+    <div class="student-toolbar">
+
+        <MudPaper Class="student-filter-card" Elevation="0">
+
+            <MudTextField @bind-Value="searchText"
+                          Placeholder="Search announcements..."
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="student-search-field" />
+
+        </MudPaper>
+
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddAnnouncement"
+                   Class="student-add-button">
+
+            Add Announcement
+
+        </MudButton>
+
+    </div>
+
+
+    <!-- Announcements Table -->
+    <MudPaper Class="student-table-card" Elevation="0">
+
+        @if (isLoading)
+        {
+            <MudStack AlignItems="AlignItems.Center"
+                      Justify="Justify.Center"
+                      Class="pa-8">
+
+                <MudProgressCircular Color="Color.Primary"
+                                     Indeterminate="true" />
+
+                <MudText Class="mt-3">
+                    Loading announcements...
+                </MudText>
+
+            </MudStack>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudAlert Severity="Severity.Error"
+                      Class="ma-4">
+
+                @errorMessage
+
+            </MudAlert>
+        }
+        else if (!FilteredAnnouncements.Any())
+        {
+            <MudStack AlignItems="AlignItems.Center"
+                      Justify="Justify.Center"
+                      Class="pa-8">
+
+                <MudIcon Icon="@Icons.Material.Filled.Campaign"
+                         Size="Size.Large"
+                         Color="Color.Default" />
+
+                <MudText Typo="Typo.h6" Class="mt-3">
+                    No announcements found
+                </MudText>
+
+                <MudText Typo="Typo.body2">
+                    Try changing your search or create a new announcement.
+                </MudText>
+
+            </MudStack>
+        }
+        else
+        {
+            <MudTable Items="FilteredAnnouncements"
+                      Hover="true"
+                      Breakpoint="Breakpoint.Sm"
+                      Class="student-data-table">
+
+                <HeaderContent>
+
+                    <MudTh>Title</MudTh>
+
+                    <MudTh>Message</MudTh>
+
+                    <MudTh>Created</MudTh>
+
+                    <MudTh>Updated</MudTh>
+
+                    <MudTh>Status</MudTh>
+
+                    <MudTh>Actions</MudTh>
+
+                </HeaderContent>
+
+
+                <RowTemplate>
+
+                    <MudTd DataLabel="Title">
+                        <MudText Typo="Typo.body1">
+                            @context.Title
+                        </MudText>
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Message">
+
+                        <MudText Typo="Typo.body2"
+                                 Class="announcement-message">
+
+                            @context.Message
+
+                        </MudText>
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Created">
+
+                        <MudText Typo="Typo.body2">
+                            @context.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                        </MudText>
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Updated">
+
+                        <MudText Typo="Typo.body2">
+                            @context.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                        </MudText>
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Status">
+
+                        @if (context.IsActive)
+                        {
+                            <MudChip T="string"
+                                     Color="Color.Success"
+                                     Size="Size.Small">
+                                Active
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string"
+                                     Color="Color.Default"
+                                     Size="Size.Small">
+                                Inactive
+                            </MudChip>
+                        }
+
+                    </MudTd>
+
+
+                    <MudTd DataLabel="Actions">
+
+                        <MudStack Row="true"
+                                  Spacing="1">
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           Title="View"
+                                           OnClick="@(() => ViewAnnouncement(context.Id))" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Warning"
+                                           Size="Size.Small"
+                                           Title="Edit"
+                                           OnClick="@(() => EditAnnouncement(context.Id))" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           Title="Delete"
+                                           OnClick="@(() => OpenDeleteDialog(context))" />
+
+                        </MudStack>
+
+                    </MudTd>
+
+                </RowTemplate>
+
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+
+            </MudTable>
+        }
+
+    </MudPaper>
+
+
+    <!-- Delete Confirmation Modal -->
+    @if (announcementToDelete != null)
+    {
+        <div class="student-delete-overlay">
+
+            <div class="student-delete-modal">
+
+                <MudIconButton Icon="@Icons.Material.Filled.Close"
+                               Class="student-delete-close"
+                               OnClick="CloseDeleteDialog" />
+
+
+                <MudStack AlignItems="AlignItems.Center"
+                          Spacing="2">
+
+                    <MudAvatar Color="Color.Error"
+                               Size="Size.Large">
+
+                        <MudIcon Icon="@Icons.Material.Filled.Delete"
+                                 Size="Size.Medium" />
+
+                    </MudAvatar>
+
+
+                    <MudText Typo="Typo.h5">
+                        Delete Announcement?
+                    </MudText>
+
+
+                    <MudText Typo="Typo.body2"
+                             Align="Align.Center">
+
+                        Are you sure you want to delete this announcement?
+
+                    </MudText>
+
+
+                    <MudText Typo="Typo.subtitle1"
+                             Align="Align.Center">
+
+                        <strong>@announcementToDelete.Title</strong>
+
+                    </MudText>
+
+
+                    <MudAlert Severity="Severity.Warning"
+                              Variant="Variant.Outlined"
+                              Class="mt-2">
+
+                        This action cannot be undone.
+
+                    </MudAlert>
+
+                </MudStack>
+
+
+                <MudStack Row="true"
+                          Justify="Justify.Center"
+                          Spacing="2"
+                          Class="mt-5">
+
+                    <MudButton Variant="Variant.Outlined"
+                               OnClick="CloseDeleteDialog"
+                               Disabled="isDeleting">
+
+                        Cancel
+
+                    </MudButton>
+
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Error"
+                               StartIcon="@Icons.Material.Filled.Delete"
+                               OnClick="DeleteAnnouncement"
+                               Disabled="isDeleting">
+
+                        @if (isDeleting)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="mr-2" />
+                            <span>Deleting...</span>
+                        }
+                        else
+                        {
+                            <span>Delete permanently</span>
+                        }
+                    </MudButton>
+                </MudStack>
+            </div>
+        </div>
+    }
+
+</div>
+
+
+@code {
+
+    private List<AnnouncementDto> announcements = new();
+
+    private bool isLoading = true;
+
+    private bool isDeleting;
+
+    private string? errorMessage;
+
+    private string searchText = string.Empty;
+
+    private AnnouncementDto? announcementToDelete;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAnnouncements();
+    }
+
+
+    private async Task LoadAnnouncements()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await AnnouncementService.GetAllAnnouncementsAsync();
+
+            announcements = result.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load announcements.";
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private IEnumerable<AnnouncementDto> FilteredAnnouncements
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                return announcements;
+            }
+
+            return announcements.Where(a =>
+                a.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                a.Message.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+
+    private void AddAnnouncement()
+    {
+        Navigation.NavigateTo("/announcements/create");
+    }
+
+
+    private void ViewAnnouncement(int id)
+    {
+        Navigation.NavigateTo($"/announcements/view/{id + 1}");
+    }
+
+
+    private void EditAnnouncement(int id)
+    {
+        Navigation.NavigateTo($"/announcements/edit/{id + 1}");
+    }
+
+
+    private void OpenDeleteDialog(AnnouncementDto announcement)
+    {
+        announcementToDelete = announcement;
+    }
+
+
+    private void CloseDeleteDialog()
+    {
+        if (!isDeleting)
+        {
+            announcementToDelete = null;
+        }
+    }
+
+
+    private async Task DeleteAnnouncement()
+    {
+        if (announcementToDelete == null)
+        {
+            return;
+        }
+
+        isDeleting = true;
+
+        try
+        {
+            var success = await AnnouncementService.DeleteAnnouncementAsync(
+                announcementToDelete.Id + 1
+            );
+
+            if (success)
+            {
+                Snackbar.Add(
+                    "Announcement deleted successfully.",
+                    Severity.Success
+                );
+
+                announcementToDelete = null;
+
+                await LoadAnnouncements();
+            }
+            else
+            {
+                Snackbar.Add(
+                    "Announcement not found.",
+                    Severity.Error
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                "Failed to delete announcement.",
+                Severity.Error
+            );
+
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+}

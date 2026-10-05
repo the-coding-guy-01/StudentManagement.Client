@@ -1,0 +1,55 @@
+﻿.student-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.student-filter-card {
+    flex: 1;
+    padding: 0;
+    background: transparent;
+}
+
+.announcement-heading {
+    margin-bottom: 30px;
+}
+
+.announcement-heading .student-page-subtitle {
+    max-width: 600px;
+    line-height: 1.55;
+}
+
+.announcement-filter-card {
+    max-width: 560px;
+}
+
+.student-search-field {
+    width: 100%;
+    flex-grow: 1;
+}
+
+.announcement-filter-card ::deep .mud-input-outlined-border {
+    border-color: #d9e3f2;
+    border-radius: 12px;
+}
+
+.announcement-filter-card ::deep .mud-input-outlined {
+    background: #fff;
+    border-radius: 12px;
+}
+
+.announcement-filter-card ::deep .mud-input-control {
+    min-width: 0;
+}
+
+.student-add-button {
+    flex-shrink: 0;
+    min-height: 48px;
+    padding-inline: 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-transform: none;
+}

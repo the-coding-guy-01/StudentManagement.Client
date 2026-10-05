@@ -1,0 +1,163 @@
+﻿@page "/announcements/create"
+
+@using StudentManagement.Client.Models.Announcements
+@using StudentManagement.Client.Services.Interfaces
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IAnnouncementService AnnouncementService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Add Announcement</PageTitle>
+
+<div class="student-admin-page announcement-editor-page">
+    <div class="student-page-heading announcement-editor-heading">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Campaign"
+                     Class="student-heading-icon" />
+            <div>
+                <MudText Typo="Typo.h3"
+                         Class="student-page-title">
+                    Create announcement
+                </MudText>
+                <MudText Typo="Typo.body1"
+                         Class="student-page-subtitle">
+                    Share an important update with your school community.
+                </MudText>
+            </div>
+        </MudStack>
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="Cancel"
+                   Class="announcement-back-button">
+            Back to announcements
+        </MudButton>
+    </div>
+
+    <MudPaper Class="student-form-card pa-6"
+              Elevation="0">
+        <EditForm Model="@announcement"
+                  OnValidSubmit="AddAnnouncement">
+            <DataAnnotationsValidator />
+            <MudStack Spacing="4">
+                <div class="announcement-form-intro">
+                    <MudText Typo="Typo.h6" Class="announcement-form-title">
+                        Announcement details
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="announcement-form-description">
+                        Add a clear title and message so readers can quickly understand your update.
+                    </MudText>
+                </div>
+
+                <MudTextField @bind-Value="announcement.Title"
+                              Label="Title"
+                              Placeholder="e.g., Campus will be closed on Friday"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Title is required."
+                              HelperText="Use a short, specific title."
+                              MaxLength="120"
+                              FullWidth="true" />
+
+                <MudTextField @bind-Value="announcement.Message"
+                              Label="Message"
+                              Placeholder="Write the details readers need to know..."
+                              Variant="Variant.Outlined"
+                              Lines="6"
+                              Required="true"
+                              RequiredError="Message is required."
+                              HelperText="Include any dates, actions, or contact details that are relevant."
+                              FullWidth="true" />
+
+                <MudStack Row="true"
+                          Justify="Justify.FlexEnd"
+                          Spacing="2"
+                          Class="announcement-form-actions mt-3">
+                    <MudButton Variant="Variant.Outlined"
+                               OnClick="Cancel"
+                               Disabled="isSaving"
+                               Class="announcement-cancel-button">
+                        Cancel
+                    </MudButton>
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               Disabled="isSaving"
+                               Class="announcement-submit-button">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="mr-2" />
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Create announcement</span>
+                        }
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </EditForm>
+    </MudPaper>
+</div>
+
+
+@code {
+
+    private CreateAnnouncementDto announcement = new();
+
+    private bool isSaving;
+
+
+    private async Task AddAnnouncement()
+    {
+        isSaving = true;
+
+        try
+        {
+            var result = await AnnouncementService
+                .CreateAnnouncementAsync(announcement);
+
+            if (result != null)
+            {
+                Snackbar.Add(
+                    "Announcement created successfully.",
+                    Severity.Success
+                );
+
+                Navigation.NavigateTo("/announcements");
+            }
+            else
+            {
+                Snackbar.Add(
+                    "Failed to create announcement.",
+                    Severity.Error
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(
+                "Failed to create announcement.",
+                Severity.Error
+            );
+
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/announcements");
+    }
+
+}
