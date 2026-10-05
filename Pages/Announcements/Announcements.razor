@@ -31,36 +31,31 @@
     </div>
 
 
-    <!-- Toolbar -->
-    <div class="student-toolbar">
+<!-- Toolbar -->
+<div class="announcement-toolbar">
 
-        <MudPaper Class="student-filter-card announcement-filter-card" Elevation="0">
+    <MudPaper Class="announcement-search-card" Elevation="0">
+        <MudTextField @bind-Value="searchText"
+                      Placeholder="Search by title or message..."
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Clearable="true"
+                      FullWidth="true"
+                      aria-label="Search announcements"
+                      Class="announcement-search-field" />
+    </MudPaper>
 
-            <MudTextField @bind-Value="searchText"
-                          Placeholder="Search by title or message..."
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          Immediate="true"
-                          Clearable="true"
-                          FullWidth="true"
-                          aria-label="Search announcements"
-                          Class="student-search-field" />
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="AddAnnouncement"
+               Class="announcement-create-button">
+        Create announcement
+    </MudButton>
 
-        </MudPaper>
-
-
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="AddAnnouncement"
-                   Class="student-add-button">
-
-            Create announcement
-
-        </MudButton>
-
-    </div>
+</div>
 
 
     <!-- Announcements Table -->
