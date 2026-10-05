@@ -11,7 +11,7 @@
 
 <PageTitle>Announcements</PageTitle>
 
-<div class="student-admin-page">
+<div class="student-admin-page announcement-list-page">
 
     <div class="student-page-heading announcement-heading">
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -24,7 +24,7 @@
                 </MudText>
 
                 <MudText Typo="Typo.body1" Class="student-page-subtitle">
-                    Manage announcements
+                    Create, review, and manage updates for your school community.
                 </MudText>
             </div>
         </MudStack>
@@ -34,14 +34,17 @@
     <!-- Toolbar -->
     <div class="student-toolbar">
 
-        <MudPaper Class="student-filter-card" Elevation="0">
+        <MudPaper Class="student-filter-card announcement-filter-card" Elevation="0">
 
             <MudTextField @bind-Value="searchText"
-                          Placeholder="Search announcements..."
+                          Placeholder="Search by title or message..."
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Immediate="true"
+                          Clearable="true"
+                          FullWidth="true"
+                          aria-label="Search announcements"
                           Class="student-search-field" />
 
         </MudPaper>
@@ -53,7 +56,7 @@
                    OnClick="AddAnnouncement"
                    Class="student-add-button">
 
-            Add Announcement
+            Create announcement
 
         </MudButton>
 
@@ -97,12 +100,12 @@
                          Size="Size.Large"
                          Color="Color.Default" />
 
-                <MudText Typo="Typo.h6" Class="mt-3">
-                    No announcements found
+                <MudText Typo="Typo.h6" Class="announcement-empty-title mt-3">
+                    @(string.IsNullOrWhiteSpace(searchText) ? "No announcements yet" : "No matching announcements")
                 </MudText>
 
                 <MudText Typo="Typo.body2">
-                    Try changing your search or create a new announcement.
+                    @(string.IsNullOrWhiteSpace(searchText) ? "Create your first announcement to keep your school community informed." : "Try a different title or keyword, or clear your search.")
                 </MudText>
 
             </MudStack>
@@ -235,20 +238,22 @@
     <!-- Delete Confirmation Modal -->
     @if (announcementToDelete != null)
     {
-        <div class="student-delete-overlay">
+        <div class="student-delete-overlay announcement-delete-overlay">
 
-            <div class="student-delete-modal">
+            <div class="student-delete-modal announcement-delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-announcement-title">
 
                 <MudIconButton Icon="@Icons.Material.Filled.Close"
                                Class="student-delete-close"
-                               OnClick="CloseDeleteDialog" />
+                               OnClick="CloseDeleteDialog"
+                               Title="Close confirmation" />
 
 
                 <MudStack AlignItems="AlignItems.Center"
                           Spacing="2">
 
                     <MudAvatar Color="Color.Error"
-                               Size="Size.Large">
+                               Size="Size.Large"
+                               Class="announcement-delete-avatar">
 
                         <MudIcon Icon="@Icons.Material.Filled.Delete"
                                  Size="Size.Medium" />
@@ -256,21 +261,22 @@
                     </MudAvatar>
 
 
-                    <MudText Typo="Typo.h5">
-                        Delete Announcement?
+                    <MudText Typo="Typo.h5" id="delete-announcement-title" Class="announcement-delete-title">
+                        Delete this announcement?
                     </MudText>
 
 
                     <MudText Typo="Typo.body2"
                              Align="Align.Center">
 
-                        Are you sure you want to delete this announcement?
+                        This announcement will be permanently removed from your school community.
 
                     </MudText>
 
 
                     <MudText Typo="Typo.subtitle1"
-                             Align="Align.Center">
+                             Align="Align.Center"
+                             Class="announcement-delete-target">
 
                         <strong>@announcementToDelete.Title</strong>
 
@@ -279,7 +285,7 @@
 
                     <MudAlert Severity="Severity.Warning"
                               Variant="Variant.Outlined"
-                              Class="mt-2">
+                              Class="announcement-delete-warning mt-2">
 
                         This action cannot be undone.
 
@@ -289,13 +295,14 @@
 
 
                 <MudStack Row="true"
-                          Justify="Justify.Center"
+                          Justify="Justify.FlexEnd"
                           Spacing="2"
                           Class="mt-5">
 
                     <MudButton Variant="Variant.Outlined"
                                OnClick="CloseDeleteDialog"
-                               Disabled="isDeleting">
+                               Disabled="isDeleting"
+                               Class="announcement-cancel-button">
 
                         Cancel
 
@@ -306,7 +313,8 @@
                                Color="Color.Error"
                                StartIcon="@Icons.Material.Filled.Delete"
                                OnClick="DeleteAnnouncement"
-                               Disabled="isDeleting">
+                               Disabled="isDeleting"
+                               Class="announcement-confirm-delete">
 
                         @if (isDeleting)
                         {
@@ -396,13 +404,13 @@
 
     private void ViewAnnouncement(int id)
     {
-        Navigation.NavigateTo($"/announcements/view/{id + 1}");
+        Navigation.NavigateTo($"/announcements/view/{id}");
     }
 
 
     private void EditAnnouncement(int id)
     {
-        Navigation.NavigateTo($"/announcements/edit/{id + 1}");
+        Navigation.NavigateTo($"/announcements/edit/{id}");
     }
 
 
@@ -433,7 +441,7 @@
         try
         {
             var success = await AnnouncementService.DeleteAnnouncementAsync(
-                announcementToDelete.Id + 1
+                announcementToDelete.Id
             );
 
             if (success)

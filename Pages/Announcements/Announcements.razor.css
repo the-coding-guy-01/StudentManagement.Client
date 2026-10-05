@@ -22,7 +22,9 @@
 }
 
 .announcement-filter-card {
-    max-width: 560px;
+    flex: 1 1 480px;
+    width: min(100%, 640px);
+    max-width: 640px;
 }
 
 .student-search-field {
@@ -30,18 +32,44 @@
     flex-grow: 1;
 }
 
+.announcement-filter-card ::deep .mud-input-control,
+.announcement-filter-card ::deep .mud-input-container,
+.announcement-filter-card ::deep .mud-input-root {
+    width: 100%;
+}
+
 .announcement-filter-card ::deep .mud-input-outlined-border {
-    border-color: #d9e3f2;
+    border-color: #dce5f2;
     border-radius: 12px;
+    transition: border-color .16s ease, box-shadow .16s ease;
 }
 
 .announcement-filter-card ::deep .mud-input-outlined {
+    min-height: 52px;
     background: #fff;
     border-radius: 12px;
 }
 
 .announcement-filter-card ::deep .mud-input-control {
     min-width: 0;
+}
+
+.announcement-filter-card ::deep .mud-input-adornment .mud-icon-root {
+    color: #7486a0;
+}
+
+.announcement-filter-card ::deep .mud-input-outlined.mud-input-focused .mud-input-outlined-border {
+    border-color: #5b56e8;
+    box-shadow: 0 0 0 3px rgba(91, 86, 232, .12);
+}
+
+.announcement-filter-card ::deep input {
+    color: #19345b;
+}
+
+.announcement-filter-card ::deep input::placeholder {
+    color: #8795aa;
+    opacity: 1;
 }
 
 .student-add-button {
@@ -52,4 +80,31 @@
     font-weight: 700;
     white-space: nowrap;
     text-transform: none;
+}
+
+.announcement-list-page { max-width: 1440px; margin-inline: auto; }
+.student-add-button { transition: transform .16s ease, box-shadow .16s ease; }
+.student-add-button:hover { box-shadow: 0 8px 20px rgba(44, 101, 210, .2); transform: translateY(-1px); }
+.announcement-list-page ::deep .student-table-card { overflow: hidden; border: 1px solid #e3eaf5; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(33, 68, 120, .06); }
+.announcement-list-page ::deep .student-data-table thead th { padding: 16px 20px; background: #f6f8fc; color: #617491; font-size: .76rem; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
+.announcement-list-page ::deep .student-data-table tbody td { padding: 17px 20px; border-color: #edf1f7; color: #304766; vertical-align: middle; }
+.announcement-list-page ::deep .student-data-table tbody tr:hover { background: #f8faff; }
+.announcement-list-page ::deep .announcement-message { display: -webkit-box; max-width: 420px; overflow: hidden; color: #64748b; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.announcement-list-page ::deep .mud-icon-button { border-radius: 9px; }
+.announcement-empty-title { color: #18345e; font-weight: 750; }
+.announcement-delete-overlay { z-index: 1500; padding: 20px; background: rgba(15, 32, 59, .58); backdrop-filter: blur(3px); }
+.announcement-delete-modal { max-width: 480px; padding: 34px; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 28px 90px rgba(12, 31, 64, .3); }
+.announcement-delete-modal ::deep .student-delete-close { position: absolute; top: 12px; right: 12px; color: #8291a8; }
+.announcement-delete-avatar { width: 64px; height: 64px; background: #fff0f1 !important; color: #d64550 !important; }
+.announcement-delete-title { color: #19345b; font-weight: 800; }
+.announcement-delete-target { max-width: 100%; color: #223a5c; overflow-wrap: anywhere; }
+.announcement-delete-warning { max-width: 100%; border-radius: 10px; text-align: left; }
+.announcement-confirm-delete { border-radius: 10px; font-weight: 700; text-transform: none; }
+
+@media (max-width: 700px) {
+    .student-toolbar { align-items: stretch; flex-direction: column; }
+    .announcement-filter-card { flex-basis: auto; max-width: none; }
+    .student-add-button { width: 100%; }
+    .announcement-delete-modal { padding: 28px 22px 22px; }
+    .announcement-delete-modal ::deep .mud-button-root { width: 100%; min-height: 44px; }
 }

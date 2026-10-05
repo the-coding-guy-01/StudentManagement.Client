@@ -1,5 +1,5 @@
 .announcement-editor-page {
-    max-width: 960px;
+    max-width: 1040px;
     margin-inline: auto;
 }
 
@@ -29,7 +29,15 @@
 .announcement-editor-page ::deep .student-form-card {
     padding: 32px !important;
     border-radius: 18px;
+    box-shadow: 0 16px 42px rgba(43, 91, 158, .09);
 }
+
+.announcement-editor-page ::deep .mud-input-outlined-border { border-color: #d8e2f0; border-radius: 11px; }
+.announcement-editor-page ::deep .mud-input-outlined:hover .mud-input-outlined-border { border-color: #93afd9; }
+.announcement-editor-page ::deep .mud-input-label { color: #536984; font-weight: 600; }
+.announcement-editor-page ::deep .mud-input-control { min-width: 0; }
+.announcement-editor-page ::deep textarea { line-height: 1.65; }
+.announcement-editor-page ::deep .mud-input-helper-text { color: #73839a; }
 
 .announcement-form-intro {
     padding-bottom: 18px;
@@ -78,6 +86,10 @@
     min-width: 156px;
     min-height: 46px;
 }
+
+.announcement-submit-button { box-shadow: 0 5px 14px rgba(40, 91, 190, .17); }
+.announcement-cancel-button { border-color: #d7e0ee; }
+.announcement-back-button { border-radius: 9px; font-weight: 700; text-transform: none; }
 
 .announcement-load-error {
     display: flex;
