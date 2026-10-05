@@ -2,12 +2,14 @@
 
 @layout StudentLayout
 
+@using StudentManagement.Client.Models.Announcements
 @using StudentManagement.Client.Models.StudentPortal
 @using StudentManagement.Client.Services.Interfaces
 
 @attribute [Authorize(Roles = "Student")]
 
 @inject IStudentProfileService StudentProfileService
+@inject IAnnouncementService AnnouncementService
 @inject ISnackbar Snackbar
 
 <PageTitle>Student Dashboard</PageTitle>
@@ -248,82 +250,51 @@
             <!-- Announcements -->
 
             <MudItem xs="12" md="4">
-
-                <MudCard Elevation="1">
-
+                <MudCard Elevation="1" Class="student-announcements-card">
                     <MudCardHeader>
-
                         <CardHeaderContent>
-
-                            <MudText Typo="Typo.h6">
-                                Announcements
-                            </MudText>
-
+                            <MudText Typo="Typo.h6">Announcements</MudText>
                         </CardHeaderContent>
-
-                        <CardHeaderActions>
-
-                            <MudButton Variant="Variant.Text"
-                                       Color="Color.Primary"
-                                       Href="/student-portal/announcements">
-                                View All
-                            </MudButton>
-
-                        </CardHeaderActions>
-
                     </MudCardHeader>
 
-
                     <MudCardContent>
+                        @if (_loading)
+                        {
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Loading announcements...</MudText>
+                            </MudStack>
+                        }
+                        else if (_announcements is null || !_announcements.Any())
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                No announcements at the moment.
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudStack Spacing="3">
+                                @foreach (var item in _announcements)
+                                {
+                                    <div class="student-announcement-item">
+                                        <MudText Typo="Typo.subtitle2" Class="student-announcement-title">@item.Title</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="student-announcement-message">
+                                            @item.Message
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @TimeAgo(item.CreatedAt)
+                                        </MudText>
+                                    </div>
 
-                        <MudStack Spacing="3">
-
-                            <div>
-
-                                <MudText Typo="Typo.subtitle2">
-                                    Semester Registration
-                                </MudText>
-
-                                <MudText Typo="Typo.body2"
-                                         Color="Color.Secondary">
-                                    Semester registration is now open.
-                                </MudText>
-
-                                <MudText Typo="Typo.caption"
-                                         Color="Color.Secondary">
-                                    Today
-                                </MudText>
-
-                            </div>
-
-
-                            <MudDivider />
-
-
-                            <div>
-
-                                <MudText Typo="Typo.subtitle2">
-                                    Exam Registration
-                                </MudText>
-
-                                <MudText Typo="Typo.body2"
-                                         Color="Color.Secondary">
-                                    Check the examination registration deadline.
-                                </MudText>
-
-                                <MudText Typo="Typo.caption"
-                                         Color="Color.Secondary">
-                                    2 days ago
-                                </MudText>
-
-                            </div>
-
-                        </MudStack>
-
+                                    @if (item != _announcements.Last())
+                                    {
+                                        <MudDivider />
+                                    }
+                                }
+                            </MudStack>
+                        }
                     </MudCardContent>
-
                 </MudCard>
-
             </MudItem>
 
         </MudGrid>
@@ -338,10 +309,31 @@
 
     private bool isLoading = true;
 
+    private List<AnnouncementDto>? _announcements;
+    private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadDashboard();
+
+        try
+        {
+            var all = await AnnouncementService.GetAllAnnouncementsAsync();
+
+            _announcements = all
+                .Where(a => a.IsActive)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(3)                 // dashboard only shows the latest few
+                .ToList();
+        }
+        catch (HttpRequestException)
+        {
+            _announcements = new List<AnnouncementDto>();
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
 
@@ -365,6 +357,20 @@
         {
             isLoading = false;
         }
+    }
+    
+
+    private static string TimeAgo(DateTime date)
+    {
+        var span = DateTime.UtcNow - date.ToUniversalTime();
+
+        if (span.TotalMinutes < 1) return "Just now";
+        if (span.TotalHours < 1) return $"{(int)span.TotalMinutes} min ago";
+        if (span.TotalDays < 1) return "Today";
+        if (span.TotalDays < 2) return "Yesterday";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} days ago";
+
+        return date.ToLocalTime().ToString("MMM d, yyyy");
     }
 
 }
