@@ -1,0 +1,41 @@
+@page "/student/results/{Id:int}"
+@layout StudentLayout
+@using Microsoft.AspNetCore.Authorization
+@using StudentManagement.Client.Models.StudentPortal
+@using StudentManagement.Client.Services.Interfaces
+@attribute [Authorize(Roles = "Student")]
+@inject IStudentResultsService ResultsService
+@inject NavigationManager Navigation
+
+<PageTitle>Result Details</PageTitle>
+<MudStack Spacing="3">
+    <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/student/results" Class="align-self-start">Back to results</MudButton>
+    @if (loading) { <MudProgressLinear Indeterminate="true" /> }
+    else if (result is null) { <MudAlert Severity="Severity.Info">This result could not be found.</MudAlert> }
+    else
+    {
+        <div><MudText Typo="Typo.overline" Color="Color.Primary">RESULT DETAILS</MudText><MudText Typo="Typo.h3">@result.AssessmentName</MudText><MudText Color="Color.Secondary">@result.CourseName · @result.AssessmentType</MudText></div>
+        @if (result.Status == "Pending")
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Schedule">This result has not been published yet. Marks and grade are unavailable until it is released.</MudAlert>
+        }
+        <MudPaper Class="pa-6" Elevation="1">
+            <MudGrid Spacing="4">
+                <MudItem xs="12" sm="6"><MudText Color="Color.Secondary">Course name</MudText><MudText Typo="Typo.h6">@result.CourseName</MudText></MudItem>
+                <MudItem xs="12" sm="6"><MudText Color="Color.Secondary">Assessment name</MudText><MudText Typo="Typo.h6">@result.AssessmentName</MudText></MudItem>
+                <MudItem xs="12" sm="6"><MudText Color="Color.Secondary">Marks obtained</MudText><MudText Typo="Typo.h6">@(result.MarksObtained.HasValue ? $"{result.MarksObtained:0.##} / {result.MaximumMarks:0.##}" : "Unavailable")</MudText></MudItem>
+                <MudItem xs="12" sm="6"><MudText Color="Color.Secondary">Percentage</MudText><MudText Typo="Typo.h6">@(result.Percentage.HasValue ? $"{result.Percentage:0.##}%" : "Unavailable")</MudText></MudItem>
+                <MudItem xs="12" sm="6"><MudText Color="Color.Secondary">Grade</MudText><MudText Typo="Typo.h6">@(result.Grade ?? "Unavailable")</MudText></MudItem>
+                <MudItem xs="12" sm="6"><MudText Color="Color.Secondary">Result status</MudText><MudChip T="string" Color="@(result.Status == "Pass" ? Color.Success : result.Status == "Fail" ? Color.Error : Color.Warning)">@result.Status</MudChip></MudItem>
+                <MudItem xs="12"><MudText Color="Color.Secondary">Published date</MudText><MudText Typo="Typo.h6">@(result.PublishedDate?.ToLocalTime().ToString("MMMM d, yyyy") ?? "Not published")</MudText></MudItem>
+            </MudGrid>
+        </MudPaper>
+    }
+</MudStack>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private AcademicResultDto? result;
+    private bool loading = true;
+    protected override async Task OnParametersSetAsync() { loading = true; result = await ResultsService.GetResultAsync(Id); loading = false; }
+}

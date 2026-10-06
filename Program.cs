@@ -82,4 +82,6 @@ builder.Services.AddScoped<IAppUserService, AppUserService>();
 
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 
+builder.Services.AddScoped<IStudentResultsService, StudentResultsService>();
+
 await builder.Build().RunAsync();

@@ -1,0 +1,89 @@
+@page "/student/results"
+@layout StudentLayout
+@using Microsoft.AspNetCore.Authorization
+@using StudentManagement.Client.Models.StudentPortal
+@using StudentManagement.Client.Services.Interfaces
+@attribute [Authorize(Roles = "Student")]
+@inject IStudentResultsService ResultsService
+@inject ISnackbar Snackbar
+
+<PageTitle>My Results</PageTitle>
+
+<MudStack Spacing="4">
+    <div>
+        <MudText Typo="Typo.overline" Color="Color.Primary">ACADEMIC PERFORMANCE</MudText>
+        <MudText Typo="Typo.h3">My Results</MudText>
+        <MudText Color="Color.Secondary">Review published assessment results and track what is still pending.</MudText>
+    </div>
+
+    @if (loading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (error)
+    {
+        <MudAlert Severity="Severity.Error">Results could not be loaded. <MudButton OnClick="Reload">Try again</MudButton></MudAlert>
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="6" md="3"><MudPaper Class="pa-4" Elevation="1"><MudText Color="Color.Secondary">Average score</MudText><MudText Typo="Typo.h4">@Format(summary.AverageScore)</MudText></MudPaper></MudItem>
+            <MudItem xs="12" sm="6" md="3"><MudPaper Class="pa-4" Elevation="1"><MudText Color="Color.Secondary">Highest score</MudText><MudText Typo="Typo.h4">@Format(summary.HighestScore)</MudText></MudPaper></MudItem>
+            <MudItem xs="12" sm="6" md="3"><MudPaper Class="pa-4" Elevation="1"><MudText Color="Color.Secondary">Passed assessments</MudText><MudText Typo="Typo.h4">@summary.PassedAssessments</MudText></MudPaper></MudItem>
+            <MudItem xs="12" sm="6" md="3"><MudPaper Class="pa-4" Elevation="1"><MudText Color="Color.Secondary">Total assessments</MudText><MudText Typo="Typo.h4">@summary.TotalAssessments</MudText></MudPaper></MudItem>
+        </MudGrid>
+
+        <MudPaper Class="pa-4" Elevation="1">
+            <MudGrid Spacing="2">
+                <MudItem xs="12" md="4"><MudTextField T="string" Value="search" ValueChanged="@(async (string value) => { search = value; await LoadResults(); })" Label="Search results" Placeholder="Course or assessment" Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" /></MudItem>
+                <MudItem xs="12" sm="4" md="3"><MudSelect T="string" Value="course" ValueChanged="@(async (string value) => { course = value; await LoadResults(); })" Label="Course" Variant="Variant.Outlined" Clearable="true"><MudSelectItem T="string" Value="@string.Empty">All courses</MudSelectItem>@foreach (var item in courses){<MudSelectItem T="string" Value="@item">@item</MudSelectItem>}</MudSelect></MudItem>
+                <MudItem xs="12" sm="4" md="2"><MudSelect T="string" Value="type" ValueChanged="@(async (string value) => { type = value; await LoadResults(); })" Label="Assessment type" Variant="Variant.Outlined" Clearable="true"><MudSelectItem T="string" Value="@string.Empty">All types</MudSelectItem>@foreach (var item in types){<MudSelectItem T="string" Value="@item">@item</MudSelectItem>}</MudSelect></MudItem>
+                <MudItem xs="12" sm="4" md="3"><MudSelect T="string" Value="status" ValueChanged="@(async (string value) => { status = value; await LoadResults(); })" Label="Status" Variant="Variant.Outlined" Clearable="true"><MudSelectItem T="string" Value="@string.Empty">All statuses</MudSelectItem><MudSelectItem T="string" Value="@("Pass")">Pass</MudSelectItem><MudSelectItem T="string" Value="@("Fail")">Fail</MudSelectItem><MudSelectItem T="string" Value="@("Pending")">Pending</MudSelectItem></MudSelect></MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        @if (results.Count == 0)
+        {
+            <MudPaper Class="pa-8 text-center" Elevation="1"><MudIcon Icon="@Icons.Material.Filled.Assessment" Size="Size.Large" Color="Color.Secondary"/><MudText Typo="Typo.h6" Class="mt-3">No results to show</MudText><MudText Color="Color.Secondary">Published results and pending assessments will appear here.</MudText></MudPaper>
+        }
+        else
+        {
+            <MudTable Items="results" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="1">
+                <HeaderContent><MudTh>Course</MudTh><MudTh>Assessment</MudTh><MudTh>Marks</MudTh><MudTh>Percentage</MudTh><MudTh>Grade</MudTh><MudTh>Status</MudTh><MudTh></MudTh></HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Course">@context.CourseName</MudTd>
+                    <MudTd DataLabel="Assessment"><MudText>@context.AssessmentName</MudText><MudText Typo="Typo.caption" Color="Color.Secondary">@context.AssessmentType</MudText></MudTd>
+                    <MudTd DataLabel="Marks">@(context.MarksObtained.HasValue ? $"{context.MarksObtained:0.##} / {context.MaximumMarks:0.##}" : "—")</MudTd>
+                    <MudTd DataLabel="Percentage">@Format(context.Percentage)</MudTd>
+                    <MudTd DataLabel="Grade">@(context.Grade ?? "—")</MudTd>
+                    <MudTd DataLabel="Status"><MudChip T="string" Size="Size.Small" Color="StatusColor(context.Status)">@context.Status</MudChip></MudTd>
+                    <MudTd><MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/student/results/{context.Id}")">Details</MudButton></MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    }
+</MudStack>
+
+@code {
+    private ResultsSummaryDto summary = new();
+    private List<AcademicResultDto> results = new();
+    private List<string> courses = new();
+    private List<string> types = new();
+    private string search = "", course = "", type = "", status = "";
+    private bool loading = true, error;
+    protected override async Task OnInitializedAsync() => await Reload();
+    private async Task Reload()
+    {
+        loading = true; error = false;
+        try { summary = await ResultsService.GetSummaryAsync(); var all = await ResultsService.GetResultsAsync(); courses = all.Select(x => x.CourseName).Distinct().Order().ToList(); types = all.Select(x => x.AssessmentType).Distinct().Order().ToList(); await LoadResults(); }
+        catch { error = true; Snackbar.Add("Unable to load results.", Severity.Error); }
+        finally { loading = false; }
+    }
+    private async Task LoadResults()
+    {
+        try { results = await ResultsService.GetResultsAsync(search, course, type, status); }
+        catch { error = true; }
+    }
+    private static string Format(decimal? value) => value.HasValue ? $"{value:0.##}%" : "—";
+    private static Color StatusColor(string value) => value switch { "Pass" => Color.Success, "Fail" => Color.Error, _ => Color.Warning };
+}
